@@ -1,14 +1,14 @@
 forward(YREAL a, YREAL b, YREAL c)
 {
 	if(Yt <= 2)
-	  YS1 = b ;
+	  YS1 = a ;
 	else YS1=b+alpha*(a-2*b+c);
 }
 
 backward(YREAL a, YREAL b, YREAL c)
 {
 	if(Yt<=2)
-	  YJ1I2 = 1;
+	  YJ1I1 = 1;
 	else
 	{
 	  YJ1I1 = alpha;
