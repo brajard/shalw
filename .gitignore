@@ -1,0 +1,15 @@
+*~
+*.nc
+matlab
+Yworkdir
+*obs_*
+\#*
+*.pdf
+*.ps
+shalw
+*.dat
+HfilA*
+HfilT
+gmon.out
+prof.txt
+.TERM_xterm
