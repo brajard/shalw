@@ -6,7 +6,7 @@ defval SZA 301
 
 hat_name shalw 
 
-//option o_gradtest
+option o_gradtest
 //option o_parallel
 option o_m1qn3
 
@@ -21,8 +21,16 @@ modul Hfil space Soce input 3 output 1 tempo cout target
 modul Ufil space Soce input 3 output 1 tempo
 modul Vfil space Soce input 3 output 1 tempo
 modul Hphy space Soce input 5 output 1 tempo
-modul Uphy space Soce input 7 output 1 tempo
-modul Vphy space Soce input 7 output 1 tempo
+modul Uphy space Soce input 9 output 1 tempo
+modul Vphy space Soce input 9 output 1 tempo
+modul Hz   space Soce input 4 output 1 tempo
+
+
+ctin Hz   1 from Hphy 1 i   j   t
+ctin Hz   2 from Hphy 1 i+1 j   t
+ctin Hz   3 from Hphy 1 i   j-1 t
+ctin Hz   4 from Hphy 1 i+1 j-1 t
+
 
 ctin Hfil 1 from Hfil 1 i   j   t-1
 ctin Hfil 2 from Hphy 1 i   j   t-1
@@ -49,6 +57,8 @@ ctin Vphy 4 from Uphy 1 i-1 j-1 t-1
 ctin Vphy 5 from Uphy 1 i-1 j   t-1
 ctin Vphy 6 from Uphy 1 i   j-1 t-1
 ctin Vphy 7 from Uphy 1 i   j   t-1
+ctin Vphy 8 from Hz   1 i   j   t
+ctin Vphy 9 from Hz   1 i-1 j   t
 
 ctin Uphy 1 from Ufil 1 i   j   t-1
 ctin Uphy 2 from Hphy 1 i+1 j   t-1
@@ -57,10 +67,15 @@ ctin Uphy 4 from Vphy 1 i   j   t-1
 ctin Uphy 5 from Vphy 1 i   j+1 t-1
 ctin Uphy 6 from Vphy 1 i+1 j   t-1
 ctin Uphy 7 from Vphy 1 i+1 j+1 t-1
+ctin Uphy 8 from Hz   1 i   j+1 t
+ctin Uphy 9 from Hz   1 i   j   t
 
 order modinspace Soce
-  order YA1 YA2
-        Hphy 
+  order YB1 YA2
+        Hphy
+	Hz 
+   forder
+   order YA1 YA2
 	Uphy 
 	Vphy
 	Hfil 

@@ -1,3 +1,4 @@
+#define GEOSTROPHY
 #define USE_NETCDF
 #ifdef USE_NETCDF
 #include <netcdf.h>
@@ -129,6 +130,9 @@ void xgauss(int argc, char *argv[]){
 
 void xvitgeo(){
 	double gf, gfh;
+#ifdef GEOSTROPHY
+	fprintf(stderr,"xvitgeo : Warning, geostrophy computation is included in the model\n");
+#endif
 	gf = (grav / pcor);
 	for(int j=0; j<SZY; j++)
 	  for(int i=0; i<SZX; i++){ 
@@ -358,7 +362,7 @@ int savenc(char filename[],char Names[NVARS][STRLEN],
 	   YREAL data[NVARS][YNBALLTIME_Toce][SZY][SZX]) {
   
   int ivar,retval;
-  int it,iy,ix,ik;
+  int it,ik;
   int ncid;
   int dimids[NDIMS];
   int varids[NVARS];
