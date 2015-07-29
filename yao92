@@ -1,0 +1,622 @@
+#!/bin/sh
+# Copyright or © or Copr. MMSA team, LOCEAN Paris (2011/01/13)
+
+#This software is a framework for variational data assimilation in numerical models.
+
+#This software is governed by the CeCILL license under French law and abiding by the rules of distribution of free software.  You can  use, modify and/ or redistribute the software under the terms of the CeCILL license as circulated by CEA, CNRS and INRIA at the following URL "http://www.cecill.info".
+
+#As a counterpart to the access to the source code and  rights to copy, modify and redistribute granted by the license, users are provided only with a limited warranty  and the software's author,  the holder of the economic rights,  and the successive licensors  have only  limited liability.
+
+# In this respect, the user's attention is drawn to the risks associated with loading,  using,  modifying and/or developing or reproducing the software by the user in light of its specific status of free software, that may mean  that it is complicated to manipulate,  and  that  also therefore means  that it is reserved for developers  and  experienced professionals having in-depth computer knowledge. Users are therefore encouraged to load and test the software's suitability as regards their requirements in conditions enabling the security of their systems and/or data to be ensured and,  more generally, to use and operate it in the same conditions as regards security.
+
+#The fact that you are presently reading this means that you have had knowledge of the CeCILL license and that you accept its terms.
+
+#YAO website : http://www.locean-ipsl.upmc.fr/~yao/
+#Contact : yao@locean-ipsl.upmc.fr
+
+
+#����������������������Function for move all files generated and quit.
+findir()
+{
+  mkdir -p $YWRKDIR;
+  #mv  -f   Y1* Y2* Yaoext* Y*.cpp Y*~ Y*.o .Y* $YWRKDIR
+  if test -e $Y1h;
+  then
+    mv -f $Y1h $YWRKDIR/$Y1h
+#    echo " > $Y1h moved as $YWRKDIR/$Y1h"
+  fi
+  if test -e $Y2h;
+  then
+    mv -f $Y2h $YWRKDIR/$Y2h
+ #   echo " > $Y2h moved as $YWRKDIR/$Y2h"
+  fi
+  ##Y3h: pour les derivees automatiques la gestion est differente
+  if test -e $Y3l;
+  then
+    mv -f $Y3l $YWRKDIR/$Y3l
+  #  echo " > $Y3l moved as $YWRKDIR/$Y3l"
+  fi
+  #
+  #Ympp=Ymain_$prj.cpp
+  if test -e $Ycpp;
+  then
+    mv -f $Ycpp $YWRKDIR/$Ycpp
+   # echo " > $Ycpp moved as $YWRKDIR/$Ycpp"
+  fi
+  if test -e $Ympp;
+  then
+    mv -f $Ympp $YWRKDIR/$Ympp
+  #  echo " > $Ympp moved as $YWRKDIR/$Ympp"
+  fi
+  # idem pour les .o et l'executable
+  if test -e Y$prj.o;
+  then
+    mv -f Y$prj.o $YWRKDIR/Y$prj.o
+  #  echo " > Y$prj.o moved as $YWRKDIR/Y$prj.o"
+  fi
+  if test -e Ymain_$prj.o;
+  then
+    mv -f Ymain_$prj.o $YWRKDIR/Ymain_$prj.o
+  #  echo " > Ymain_$prj.o moved as $YWRKDIR/Ymain_$prj.o"
+  fi
+  if test -e Yaoext_$prj
+  then
+    mv -f Yaoext_$prj $YWRKDIR/Yaoext_$prj
+  #  echo " > Yaoext_$prj moved as $YWRKDIR/Yaoext_$prj"
+  fi
+  if test -e .Y$prj.ord
+  then
+    mv -f .Y$prj.ord $YWRKDIR/.Y$prj.ord
+  #  echo " > .Y$prj.ord moved as $YWRKDIR/.Y$prj.ord"
+  fi
+
+  if [[ $OPT_NEWSTRUCTURE = "-n" ]]
+  then
+    echo "New structure"
+    if test -e Project*.hpp
+    then
+      mv Project*.hpp $YWRKDIR/
+    fi
+    for x in ./Trajectory*.hpp ; do
+		if [ -f $x ]; then
+	      mv $x ./$YWRKDIR/
+		fi
+    done
+  else
+    echo "Old structure"
+  fi
+  exit
+}
+#�����������������������������������������������������������������������
+
+
+#BEGIN of the proc�dure
+  VERS=92
+  VERS_VISU=9.2.99
+  YNAME=`basename $0`
+  VERELDAT=r2011.07.27
+  
+
+#=======================================================================
+# Determination de l'architecture materielle pour savoir quelle
+# version de librairies compilees utiliser.
+#=======================================================================
+# Si $YAOARCHI est defini (cela ce fait normalement dans fichier
+# d'environnement .cshrc) ceci definit $MACHINE. Sinon, il faut
+# determiner le type de $MACHINE selon l'architecture materielle :
+#
+#  - Par la commande `uname -s` et,
+#  - si Linux (Mandriva ici au LOCEAN), par le contenu du fichier
+#    /etc/mandriva-release.  Il faut donc adapter cette procedure selon
+#    l'environnement de systeme d'exploitation ...
+  MACHINE="UNKNOWN"
+  if [ -n "$YAOARCHI" ]; then
+    echo " > MACHINE TYPE ihnerited from YAOARCHI enviromental variable"
+    MACHINE="$YAOARCHI"
+  else
+    echo -n " > MACHINE TYPE determined now !.."
+    case `uname -s` in
+      Linux)  MACHINE=linux ;;
+      SunOS)  MACHINE=solaris ;;
+      Darwin) MACHINE=darwin ;;
+      *) cat <<EOF
+EOF
+      exit;;
+    esac
+    echo " <${MACHINE}>."
+  fi
+#echo
+#============= Traitement des options pass�es en param�tre =============
+#valeur d'option par defaut
+  OHELP="0"
+  OGENER="1"
+  OPTCPIL=""
+  #DBGCPIL=""
+  indexec="0"
+  indydir="0"
+  OCAPSUL="0"
+  OECHO="0"
+  OLIBFOR="-lgfortran"
+  OPT_NEWSTRUCTURE="-n"  
+  
+  if test $MACHINE = "darwin"
+  then
+    OLIBFOR="-L/sw/lib/gcc4.4/lib -lgfortran"
+  fi
+  
+
+#verif au moins un parametre
+#nb: le nom du projet est toujours le dernier parametre
+  if test -z $1
+  then
+    #echo " > missing paramezter, syntaxe: $YNAME {-h, [-g][{-O0, -O1, -O2, -O3}] prj}"
+    cat <<EOF
+
+  > Missing parameter, syntaxe: 
+  > $YNAME { -h, [+"optionType"] [-x execName] [-d directory] [-s] [-e] [-lg2c] prjName }
+  >
+  > Options:
+  > -h		  show a YAO help.
+  > +optionType	  option to be added directly at compilation time (it is translated in -optionType), i.e. +g add the option for DBG.
+  > -d		  directory to define a different ROOT destination directory. The default ROOT is the current directory.
+  >		  The generated files are always created in "ROOT/Yworkdir/".
+  > -x		  execName to define a different executable name. The default is the name of the application.
+  > -s		  encapsulation (performed with the creation of a namespace).
+  > -e		  echo of the compilation and the link.
+  > -lg2c	  the specification of the fortran library.
+  > -p		  enable the parallelization (openMP must be installed on the machine).
+  > prjName	  is the project name.
+EOF
+    exit;
+  fi
+
+  #boucle sur les parametres
+  for i
+  do
+    #-----> Help required ? on demande juste de l'aide
+    if test $i = "-h"
+    then
+      OHELP="1"
+    fi
+  #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  # -g option for the GNU debuger (GDB). This option is copied directly in the compilation command g++.
+  # It is not needed because if we want the GDB we write the "+g" option and this is copied at compilation time.
+  #if test $i = "-g"
+  #            then
+  #               DBGCPIL="-g"
+  #            fi
+  #            echo "DBGCPIL = " $DBGCPIL
+  #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  #  Options de compilation ???????????????
+    if test ${i:0:1} = "+"
+    then
+      OPTCPIL=$OPTCPIL$i
+    fi
+  #echo "OPTCPIL = " $OPTCPIL (cf ci apres, transformation des options de compil
+  #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  #-----> Avant l'Executable avait le meme nom que prj (=dernier parametre),
+  #maintenant ce sera par default, et il peut etre changed avec l'option -x
+    if test $indexec = "1"
+    then
+      EXECNAME=$i
+      indexec="0"
+    fi
+    if test $i = "-x"
+    then
+      indexec="1"
+    fi
+  #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  #-----> Changement du Repertoire YAO
+    if test $indydir = "1"
+    then
+      YAODIR=$i
+      indydir="0"
+    fi
+    if test $i = "-d"
+    then
+      indydir="1"
+    fi
+  #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  #-----> Encapsulation (spacename) ou pas
+    if test $i = "-s"
+    then
+      OCAPSUL="1"
+    fi
+  #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  #-----> Echo de la Compil et du Link
+    if test $i = "-e"
+    then
+      OECHO="1"
+    fi
+  #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  #-----> Librairie Fortran
+    if test $i = "-lg2c"
+    then
+      OLIBFOR="-lg2c"
+    fi
+  #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  #-----> Parallelism openMP 
+    if test $i = "-p"
+    then
+      PARALLEL="-fopenmp"
+    fi
+  #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  #-----> New structure activated
+    if test $i = "-n"
+    then
+      OPT_NEWSTRUCTURE="-n"
+    fi
+  
+  
+   #=====> Fin Boucle de traitement des Parametres
+  done
+
+  prj=`basename $i .d`
+#=======================================================================
+#biblioth�que YAODIR (pour objets YAO)
+#desormais pour changer le repertoire yao, on peut utiliser l'option -d
+  if test ${#YAODIR} -eq 0
+  then
+    echo "YAO directory variable not declared...current dir used"
+    YAODIR="."
+  fi
+#
+  if test ! -d ${YAODIR}
+  then
+    echo "$YAODIR : invalid or unavailable YAO directory"
+    exit
+  fi
+#-----------------------------------------------------------------------
+
+  BINDIR=${YAODIR}/yao/bin
+  INCDIR=${YAODIR}/yao/include
+
+#=======================================================================
+# On revient sur le traitement des param�tres
+#----> on demande juste de l'aide 
+  if test $OHELP = "1"
+  then
+    ${BINDIR}/Yao${VERS}Generator -h 
+    exit
+  fi
+
+#----> dernier parametre = prj (doit exister eventuellement avec .d)
+  if !(test -e $prj.d)
+  then
+    echo " description file $prj(.d) not found"
+    exit
+  fi
+#fi
+
+#----> nom de l'exe : exename ; s'il n'est pas affected alors c'est prj
+  if test -z $EXECNAME
+  then
+    EXECNAME=$prj
+  fi
+
+#----> on transforme les options de compilation
+  OPTCPIL=`echo $OPTCPIL | sed 's/+/ -/g'`
+
+#----> more verif on parameters
+#--> si sans generation, les fichiers Y1 et Y2 doivent etre dans le repertoire courant
+  if test $OGENER = "0"
+  then
+    if !(test -e Y1$prj.h) || !(test -e Y2$prj.h)
+    then
+      echo "file Y1$prj.h or Y2$prj.h missing"
+      exit
+    fi
+  fi
+
+#=======================================================================
+#-----------------------------------------------------------------------
+#bibliotheque YADFDIR pour la derivation automatique
+  YADFDIR=${YAODIR}/etc/bin
+
+#-----------------------------------------------------------------------
+#une bibliotheque de travail pour ne pas etre embarassed par les codes generes
+  YWRKDIR="./Yworkdir"
+
+#-----------------------------------------------------------------------
+# Compiler Global Variables:
+#-----------------------------------------------------------------------
+  CC=
+  CFLAGS=
+  CXX="g++"
+
+  #CXXFLAGS=" ${OPTCPIL} ${DBGCPIL} -Wall -DLINUXPC -Wno-deprecated -Wno-write-strings -I${INCDIR}"
+  CXXFLAGS=" ${OPTCPIL} ${DBGCPIL} -Wall -DLINUXPC -Wno-deprecated -Wno-write-strings -I${INCDIR}"
+  if test $MACHINE = "darwin"
+  then
+    CXXFLAGS=${CXXFLAGS}" -I/sw/include"
+  fi
+  NETCDFINCDIR=/usr/include
+  if [ -f  ${NETCDFINCDIR}/netcdf.h ]; then
+    CXXFLAGS=${CXXFLAGS}" -I${NETCDFINCDIR}"
+  else
+    NETCDFINC=`echo ${NETCDFINCDIR}/netcdf* | awk '{ print $1 }'`
+    if [ -d ${NETCDFINC} ]; then
+      NETCDFINCFIC="${NETCDFINC}/netcdf.h"
+      if [ -f ${NETCDFINCFIC} ]; then
+        CXXFLAGS=${CXXFLAGS}" -I${NETCDFINC}"
+      fi
+    fi
+  fi
+  #-----------------------------------------------------------------------
+  # LDFLAGS:
+  # Test d'existence de la bibliotheque NetCDF
+  NETCDFLIBDIR=/usr/lib
+  NETCDFLIB=`echo ${NETCDFLIBDIR}/libnetcdf* | awk '{ print $1 }'`
+  if test -e ${NETCDFLIB}
+  then
+    LDFLAGS=" -lm ${OLIBFOR} -L${NETCDFLIBDIR} -lnetcdf"
+  else
+    NETCDFLIBDIR=/usr/lib/local
+    NETCDFLIB=`echo ${NETCDFLIBDIR}/libnetcdf* | awk '{ print $1 }'`
+    if test -e ${NETCDFLIB}
+    then
+      LDFLAGS=" -lm ${OLIBFOR} -L${NETCDFLIBDIR} -lnetcdf"
+    else
+      NETCDFLIBDIR=/sw/lib
+      NETCDFLIB=`echo ${NETCDFLIBDIR}/libnetcdf* | awk '{ print $1 }'`
+      if test -e ${NETCDFLIB}
+      then
+        LDFLAGS=" -lm ${OLIBFOR} -L${NETCDFLIBDIR} -lnetcdf"
+      else
+        NETCDFLIBDIR=/usr/lib64
+        NETCDFLIB=`echo ${NETCDFLIBDIR}/libnetcdf* | awk '{ print $1 }'`
+        if test -e ${NETCDFLIB}
+        then
+          LDFLAGS=" -lm ${OLIBFOR} -L${NETCDFLIBDIR} -lnetcdf"
+        else
+          LDFLAGS=" -lm ${OLIBFOR}"
+        fi
+      fi
+    fi
+  fi
+
+  #=======================================================================
+  #biblioth�que MQNDIR (pour libreries M1QN3 et M2QN1)
+  if test ${#MQNDIR} -eq 0
+  then
+    echo " > MQNDIR directory variable not declared...standard directory."
+    echo 
+    MQNDIR="${YAODIR}/yao/share/m1qn3/"
+  fi
+  if test $OLIBFOR = "-lg2c"
+  then
+    BINMQN="${MQNDIR}/bin/mdk"
+  else
+    BINMQN="${MQNDIR}/bin"
+  fi
+  LDMQN=" -L${BINMQN} -lmqn"
+
+  #-----------------------------------------------------------------------
+  FC="g77"
+  #FFLAGS=" -Dkey_4dvar ${OPTCPIL} ${DBGCPIL} -Wall"
+  FFLAGS=" -Dkey_4dvar ${OPTCPIL} -Wall"
+  #
+  #CPPFLAGS=
+  #-----------------------------------------------------------------------
+
+       cat <<EOF
+       ====================================================================
+              $YNAME V.$VERS_VISU : PROJECT CREATION PROCEDURE                   
+              $VERELDAT                         
+       ====================================================================
+        `printf "LOCAL MACHINE BINARY TYPE FOUND ..... %-28s" "<$MACHINE>"` 
+       ====================================================================
+
+EOF
+
+  #-----------------------------------------------------------------------
+  echo " > Run of $YNAME for project :" $prj
+  #noms des sources
+  Ympp=Ymain_$prj.cpp
+  Y1h=Y1$prj.h
+  Y2h=Y2$prj.h
+  Y3l=Y3$prj.l
+  Y3h=Y3$prj.h
+  Ycpp=Y$prj.cpp
+
+       #=======================================================================
+       #Test: we regenerate or not? This test is automatic looking the dates of the files.
+       #Default is OGENER = "1": regenerate.
+  if test $YWRKDIR/${Y1h} -nt ${prj}.d 
+  then 
+    if test $YWRKDIR/${Y2h} -nt ${prj}.d 
+    then 
+      OGENER="0"
+      echo " > HEADERS generation not required: "
+      echo " >   the description file has not changed from the last generation of $Y1h and $Y2h."
+      echo " >   Pay attention all the warning showed in the generation process are not been displayed this way because of the non regeneration."
+      echo " >   If you want to force the regeneration remove the Yworkdir/ directory."
+  		if [[ $OPT_NEWSTRUCTURE = "-n" ]]
+		then
+			cp $YWRKDIR/Trajectory*.hpp .
+			cp $YWRKDIR/Project*.hpp .
+		fi
+		cp $YWRKDIR/$Ycpp .
+      cp $YWRKDIR/$Y1h .
+      cp $YWRKDIR/$Y2h .
+      if test -e $YWRKDIR/Yaoext_$prj
+      then
+        cp $YWRKDIR/Yaoext_$prj .
+      fi
+    fi
+  fi
+  # Remark: maybe we should consider also Yaoext_projName for the regeneration option.
+
+  #ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+  if test $OGENER = "1";
+  then
+    echo " > enter proc generation "
+    # sauvegarde (mv~) des Y1prjname.h Y2prjname.h et Yprjname.cpp ...
+    # (i.e de tout ce qui est genere, sauf Y3) s'ils existent
+    if test -e $YWRKDIR/$Y1h;
+    then
+      mv -f $YWRKDIR/$Y1h $YWRKDIR/$Y1h~
+      echo " > $Y1h moved as \~"
+    fi
+    if test -e $YWRKDIR/$Y2h;
+    then
+      mv -f $YWRKDIR/$Y2h $YWRKDIR/$Y2h~
+      echo " > $Y2h moved as \~"
+    fi
+     ##Y3h: pour les derivees automatiques la gestion est differente
+    if test -e $YWRKDIR/$Y3l;
+    then
+      mv -f $YWRKDIR/$Y3l $YWRKDIR/$Y3l~
+      echo " > $Y3l moved as \~"
+    fi
+    #
+    #Ympp=Y$prj.cpp
+    if test -e $YWRKDIR/$Ycpp;
+    then
+      mv -f $YWRKDIR/$Ycpp $YWRKDIR/$Ycpp~
+      echo " > $Ycpp moved as \~"
+    fi
+    if test -e $YWRKDIR/$Ympp;
+    then
+       mv -f $YWRKDIR/$Ympp $YWRKDIR/$Ympp~
+       echo " > $Ympp moved as \~"
+    fi
+    # idem pour les .o et l'executable
+    if test -e $YWRKDIR/Y$prj.o;
+    then
+      mv -f $YWRKDIR/Y$prj.o $YWRKDIR/Y$prj.o~
+      echo " > Y$prj.o moved as \~"
+    fi
+    if test -e $YWRKDIR/Ymain_$prj.o;
+    then
+      mv -f $YWRKDIR/Ymain_$prj.o $YWRKDIR/Ymain_$prj.o~
+      echo " > Ymain_$prj.o moved as \~"
+    fi
+    if test -e $prj;
+    then
+      mv -f $prj $YWRKDIR/$prj~
+      echo " > $prj moved as \~"
+    fi
+    if test -e $EXECNAME;
+    then
+      mv -f $EXECNAME $YWRKDIR/$EXECNAME~
+      echo " > $EXECNAME moved as \~"
+    fi
+    if test -e $YWRKDIR/Yaoext_$prj
+    then
+      mv -f $YWRKDIR/Yaoext_$prj $YWRKDIR/Yaoext_$prj~
+      echo " > Yaoext_$prj moved as \~"
+    fi
+
+  #---------------------------------------------------------------------
+  # Lancement de la GENERATION : appel de YaoXYGenerator
+  # creation des header (Y1prjname.h et Y2prjname.h, et autres ...) du projet
+   
+    if test $OCAPSUL = "1" 
+    then
+      $OPT_CAPSUL = "--namespace"
+    fi
+    
+    BEGIN_TIME=`date +%s`
+    if ${BINDIR}/yao${VERS}generator $prj $OPT_CAPSUL $OPT_NEWSTRUCTURE
+    then 
+      END_TIME=`date +%s`
+      echo " > execution time of the Yao code generator..."$(($END_TIME-$BEGIN_TIME)) second\(s\)
+      echo " > headers are now created"
+    else 
+      echo " > PROJECT HEADERS CREATION FAILED"
+      findir
+    fi
+   
+    #---------------------------------------------------------------------
+    # creation des derivees automatique (Y3prjname.h) pour les modules de la liste (Y3prjname.l)
+    if test -e $Y3l
+    then
+      if ${YADFDIR}/ylmodf $Y3l $Y3h 1
+      then 
+        echo " > automatic differenciation done"
+      else 
+        echo " > AUTOMATIC DIFFERENCIATION FAILED"
+        findir
+      fi
+    fi
+   #ggggggggggggggggggggggggggggg
+    echo " > end proc generation "
+  fi
+  # fin de la g�n�ration
+  #ggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
+
+  #=======================================================================
+  #ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+  echo " > enter proc construction "
+
+  #------- inclusion d'eventuels objets (.o) externes dont la liste aura ete
+  # produite par la directive option O_EXTOBJ
+  #if test -e "YaoEXT"
+  if test -e Yaoext_$prj
+  then
+    echo " Extern object : "
+    source ./Yaoext_$prj
+    echo "                ${LDYEXTOBJ}"
+  fi
+
+#-----------------------------------------------------------------
+# On cree de toute piece le 'vrai' main de l"application, dans un .cpp cette fois !!!
+  if test $OCAPSUL = "1"
+  then
+    echo "extern int Ygo_$prj (int argc, char *argv[]);" > $Ympp
+    echo "int main(int argc, char *argv[])"       >> $Ympp
+    echo "{   Ygo_$prj (argc, argv); return(0); }" >> $Ympp
+  else
+    echo "extern int Yentry0 (int argc, char *argv[]);" > $Ympp
+    echo "int main(int argc, char *argv[])"       >> $Ympp
+    echo "{   Yentry0 (argc, argv); return(0); }" >> $Ympp
+  fi
+
+  #-----------------------------------------------------------------------
+  echo " > end proc construction "
+  #ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
+  #=======================================================================
+  #-----------------------------------------------------------------------
+  #                     compilation et �dition des liens
+  echo " > start compilation "
+  # //--------------------------------------------------------------------
+  # cr�ation de l'executable
+  #
+  #compilation du projet.c
+  if test $OECHO = '1'
+  then
+   echo "${CXX} ${CXXFLAGS} ${PARALLEL} -c $Ympp $Ycpp"
+  fi
+  ${CXX} ${CXXFLAGS} ${PARALLEL} -c $Ympp $Ycpp
+  echo " > end of compilation, start linking "
+
+       # 2) link
+  if test $OECHO = '1'
+  then
+    echo " ${CXX} ${CXXFLAGS} ${PARALLEL} -o $EXECNAME Ymain_$prj.o Y$prj.o ${LDMQN} ${LDYEXTOBJ} ${LDFLAGS}"
+  fi
+  if ${CXX} ${CXXFLAGS} ${PARALLEL} -o $EXECNAME Ymain_$prj.o Y$prj.o ${LDMQN} ${LDYEXTOBJ} ${LDFLAGS} -lcblas -lblas
+  then
+    echo
+    echo "       =======================  PROJECT IS NOW READY  ====================="
+  else
+    echo
+    echo " > unpredictable mistakes : PROJECT BUILDING FAILED"
+    echo
+    findir
+  fi
+     
+  cat<<EOF
+                           $YNAME v$VERS_VISU : END OF PROCEDURE                     
+                           $VERELDAT                 
+       ====================================================================
+                           TOTAL COMPILATION TIME : $SECONDS second(s)            
+       ====================================================================
+
+EOF
+  findir
+  #===============================================================================
