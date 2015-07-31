@@ -57,7 +57,7 @@ char SUnits[NVARS][STRLEN]={"meters","m/s","m/s","meters","m/s","m/s"};
 #ifdef RENORM
 #define SELDON_WITH_BLAS
 #define SELDON_DEBUG_LEVEL_4
-//#define SELDON_WITH_LAPACK
+#define SELDON_WITH_LAPACK
 
 #include "/usr/home/jbrlod/usr/seldon-5.2/Seldon.hxx"
 

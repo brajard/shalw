@@ -599,7 +599,7 @@ EOF
   then
     echo " ${CXX} ${CXXFLAGS} ${PARALLEL} -o $EXECNAME Ymain_$prj.o Y$prj.o ${LDMQN} ${LDYEXTOBJ} ${LDFLAGS}"
   fi
-  if ${CXX} ${CXXFLAGS} ${PARALLEL} -o $EXECNAME Ymain_$prj.o Y$prj.o ${LDMQN} ${LDYEXTOBJ} ${LDFLAGS} -lcblas -lblas
+  if ${CXX} ${CXXFLAGS} ${PARALLEL} -o $EXECNAME Ymain_$prj.o Y$prj.o ${LDMQN} ${LDYEXTOBJ} ${LDFLAGS} -lcblas -lblas -llapack
   then
     echo
     echo "       =======================  PROJECT IS NOW READY  ====================="
