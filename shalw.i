@@ -35,7 +35,7 @@ xdisplay
 
 set_iosep
 #savestate Toce 1 ij 5% A  ./HfilT
-savestate Hfil 1 ij 5% A 3 ./HfilT
+#savestate Hfil 1 ij 5% A 3 ./HfilT
 #savestate Ufil 1 ij 5% A 0 ./UfilT
 #savestate Vfil 1 ij 5% A 0 ./VfilT
 #savestate Hphy 1 ij 5% A 0 ./HphyT
@@ -63,11 +63,15 @@ setm_dxmin 1.0e-12
 setm_epsg 1.0e-12
 setm_ddf1 1.0
 
+read_lobs obs.dat
+compute_adjoint
+renorm
+goto fin
+
 RUNM
 
 xdisplay
 #savegrad grad.dat
-xobs Hfil 50 50 300 -1
 
 xsavenc grad.nc grad
 xsavenc state.nc state
@@ -75,5 +79,5 @@ xsavenc state.nc state
 #xsavestate state.dat
 #savestate Hfil 1 ij 5% A 3 ./HfilA
 #savestate Hfil 1 ij 301 A 0 ./HfilAobs
-
-#fin
+goto fin
+fin

@@ -4,7 +4,7 @@ defval SZU 1
 defval SZT 300
 defval SZA 301
 
-hat_name shalw 
+hat_name "shalw.h" "renorm.h" 
 
 option o_gradtest
 //option o_parallel
@@ -96,3 +96,6 @@ insert_fct arg savegrad
 insert_fct arg xsavestate
 insert_fct arg xobs
 insert_fct arg xsavenc
+insert_fct arg read_lobs
+insert_fct     compute_adjoint
+insert_fct     renorm

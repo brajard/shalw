@@ -1,11 +1,24 @@
 #define GEOSTROPHY
+#define RENORM
 #define USE_NETCDF
+
 #ifdef USE_NETCDF
 #include <netcdf.h>
 
 /* Dim max des strings */
 #define STRLEN 100
 
+/* Observation structure */
+struct obs {
+  int X ;
+  int Y ;
+  int T ;
+  YREAL val;
+};
+
+/* list of obs */
+struct obs ** lobs = NULL ;
+int nobs ;
 /* Dimensions parameters */
 #define NDIMS 3
 #define Y_NAME "yaxis"
@@ -36,19 +49,45 @@ char SUnits[NVARS][STRLEN]={"meters","m/s","m/s","meters","m/s","m/s"};
 
 /* Handle errors by printing an error message and exiting with a
  * non-zero status. */
-#define ERR(e) {printf("Error: %s\n", nc_strerror(e)); return 2;}
+#define ERRNC(e) {printf("Error: %s\n", nc_strerror(e)); return 2;}
 
 
-#endif
+#endif //ifdef USE_NETCDF
 
+#ifdef RENORM
+#define SELDON_WITH_BLAS
+#define SELDON_DEBUG_LEVEL_4
+//#define SELDON_WITH_LAPACK
+
+#include "/usr/home/jbrlod/usr/seldon-5.2/Seldon.hxx"
+
+
+using namespace Seldon;
+typedef double Real_wp;
+
+void test_seldon();
+void get_adjoint(int i);
+//Adjoint matrix
+Matrix<YREAL> Radj ;
+
+//Observation vector
+Vector<YREAL> Yobs ;
+Vector<YREAL> Xc ;
+
+//Size of the control space :
+const int TotS = SZY *SZX ;
+#endif //ifdef RENORM
 
 
 //Declaration 
 extern int Yobs_insert_data (char *nmmod, int sortie, int iaxe, int jaxe, int kaxe,
 			     int pdt, YREAL val);
+extern void       Yrazgrad_all();
 
 double dx,dy,dedt,svdedt,pcor,grav,dissip,hmoy,alpha,gb,gmx,gsx,gmy,gsy;
 void savestate();
+void erase_lobs();
+void clear_Yst_nodo(struct Yst_nodo *n_obs, int lev, int max);
 
 #ifdef USE_NETCDF
 int ncinit();
@@ -70,6 +109,7 @@ void appli_start(int argc, char *argv[]){
 #ifdef USE_NETCDF
   // ncinit();
 #endif
+  test_seldon();
 
 }
 void before_it(int nit){}
@@ -110,6 +150,37 @@ short select_io(int indic, char *nmod, int sortie, int iaxe,
 	return(1);
 }
 
+void compute_adjoint() {
+  if (lobs == NULL || nobs == 0) {
+    fprintf(stderr,"compute_adjoint : no obs loaded");
+    return;
+  }
+  
+ 
+  for (int i = 0 ; i < nobs ; i++) {
+    //Forward to initialise states
+    //Needs to be done at each time step to have the good time
+    // Needs to be changes to optimize...
+    Yset_modeltime(0);
+    before_it(1);
+    //printf("---forward(i=%d)---\n",i);
+    Yforward(-1, 0);
+    
+    erase_lobs();
+    lobs[i]->val = YS_Hfil(0,lobs[i]->Y,lobs[i]->X,lobs[i]->T)-1;
+
+    Yobs_insert_data("Hfil",0,lobs[i]->Y,lobs[i]->X,0,lobs[i]->T,lobs[i]->val);
+    Yrazgrad_all();  /* avant fct de cout et backprop : sur tous les pas de temps, raz de tous les gradients de tous les modules */
+    
+    YTotalCost = 0.0;	/* Raz aussi du Cout avant les calculs de cout */
+    
+    Ybackward (-1, 0); // Ybackward (YNBSTEPTIME);/* AD (adjoint):-> d*x =M*(X).dX : Yjac * YG -> Ytbeta */
+    after_it(1);
+    get_adjoint(i);
+  } //for i
+  savestate();
+}
+
 void xdisplay(){
 	int i,j;
 	i=(int)(SZX/2);
@@ -140,6 +211,45 @@ void xvitgeo(){
 	    YS_Ufil(0,i,j,0)=gfh*(j*dy-gmy)/(gsy*gsy);
             YS_Vfil(0,i,j,0)=gfh*-(i*dx-gmx)/(gsx*gsx);
 	  }
+}
+
+void read_lobs(int argc, char *argv[]){
+  //Read list of obseravtion in a file
+  //Format of the file :
+  // Header begining with #Nombre d'obs
+  // liste of couples (x,y,t) (begining with 0);
+
+  FILE * fid;
+  int status, x,y,t;
+  fid = fopen(argv[1],"r");
+  if (fid == NULL) {
+    fprintf(stderr,"read_lobs: file %s not found\n",argv[1]);
+    return;
+  }
+  char line[128];
+  fgets(line,sizeof(line),fid);
+  sscanf(line,"#%d",&nobs);
+  fprintf(stdout,"%d obs read in %s\n",nobs,argv[1]);
+  
+  lobs = (struct obs**)malloc(nobs * sizeof(struct obs*));
+  for (int i=0;i<nobs;i++) {
+    status = fscanf(fid,"%d %d %d",&x,&y,&t);
+    if (status != 3) {
+      fprintf(stderr,"Unable to read obs #%d\n",i);
+      break;
+    }
+    lobs[i] = (struct obs*)malloc(sizeof(struct obs));
+    lobs[i] -> X = x;
+    lobs[i] -> Y = y;
+    lobs[i] -> T = t;
+    lobs[i] -> val = NAN;
+
+  }
+  for (int i=0;i<nobs;i++) 
+    printf("%d %d %d\n",lobs[i]->X,lobs[i]->Y,lobs[i]->T);
+
+  fclose(fid);
+
 }
 
 void xivg(int argc,char *argv[]){
@@ -216,9 +326,9 @@ int savegradnc() {
 
   /* Open nc file */
    if ((retval = nc_open(FILENAME, NC_WRITE, &ncid)))
-     ERR(retval);
+     ERRNC(retval);
    if ((retval=nc_inq_varids(ncid,&nvar,varids)))
-     ERR(retval);
+     ERRNC(retval);
    for (it=0;it<YNBALLTIME_Toce;it++)
      for (iy=0;iy<YA1_Soce;iy++)
        for (ix=0;ix<YA2_Soce;ix++)
@@ -227,12 +337,12 @@ int savegradnc() {
 	   for (ik=0;ik<6;ik++) 
 	     if ((retval = nc_put_vara_double(ncid, varids[ik], start, count, 
 					     &grads[ik][it][0][0])))
-	       ERR(retval);
+	       ERRNC(retval);
 	       }
    
    /* Close the file. */
    if ((retval = nc_close(ncid)))
-     ERR(retval);
+     ERRNC(retval);
    return(0);
 }
 
@@ -298,6 +408,79 @@ void savegrad(int it){
 	grads[5][it][iy][ix]=YG_Vphy(0,iy,ix,it);	      
       }
 }
+
+
+
+void erase_lobs() {
+  //Efface toute l'arboresence des obs (y compris les ébauches)
+  
+  int itraj;
+  struct Yst_nodo *YRobs = NULL;
+  YioInsertObsCtr = 0 ;
+  for (itraj=0;itraj<YNBTRAJ;itraj++) {
+    //Effacement des obs liées au modul imod
+
+    //  if (YTabMod[itraj].is_target || !YTabMod[itraj].is_cout) {
+      YRobs=YTabTraj[itraj].YRobs;
+      clear_Yst_nodo(YRobs,0,10);
+
+      YTabTraj[itraj].YRobs=NULL;
+      //}
+
+  } //for itraj
+  for (int wi = 0; wi < YNBTRAJ; ++wi)
+    {
+      YTabTraj[wi].YRobs = (struct Yst_nodo*) malloc (sizeof (struct Yst_nodo)); /* init du Root des arborescences */
+      YTabTraj[wi].YRobs->frere = YTabTraj[wi].YRobs->fils = NULL;	/* d'observations pour chaque trajectoire */
+    }
+
+}
+
+
+void clear_Yst_nodo(struct Yst_nodo *n_obs, int lev, int max) {
+  /* lev est le niveau courant (racine=0)
+max est le niveau des feuilles soit
+4 si dimod=1
+5 si dimod=2
+6 si dimod=3
+dimod est défini au niveau 2 avec dimod=YTabMod[imod].dim
+
+
+  */
+  
+  if (lev==max) {
+    //on nettoie une feuille (ni frere ni fils)
+    free(n_obs);
+    n_obs = NULL ;
+  }
+  
+  else {
+
+    if (lev==2) {
+      //on peut déterminer le niveau max
+      int dimod=YTabMod[n_obs->iind].dim;
+      max=dimod+3;
+    }
+
+    if (n_obs->fils!=NULL && n_obs->frere!=NULL) {
+      clear_Yst_nodo(n_obs->frere,lev,max);
+      n_obs->frere=NULL;
+    }    
+    if (n_obs->fils!=NULL) {
+      clear_Yst_nodo(n_obs->fils,lev+1,max);
+      n_obs->fils=NULL;
+    }
+    free(n_obs);
+    n_obs=NULL;
+  } // else (pas feuille)
+  
+
+}
+
+/************************************
+ *    NETCDF FUNCTIONS              *
+ ************************************/
+
 #ifdef USE_NETCDF
 int ncinit() {
   int ivar,retval;
@@ -306,40 +489,40 @@ int ncinit() {
   int varids[NVARS];
   /* Create the file */
   if ((retval = nc_create(FILENAME, NC_CLOBBER, &ncid)))
-      ERR(retval);
+      ERRNC(retval);
 
   /* Define the dimensions. The record dimension is defined to have
     * unlimited length - it can grow as needed. In this example it is
     * the time dimension.*/
  
    if ((retval = nc_def_dim(ncid, Y_NAME, SZY, &dimids[1])))
-      ERR(retval);
+      ERRNC(retval);
    if ((retval = nc_def_dim(ncid, X_NAME, SZX, &dimids[2])))
-      ERR(retval);
+      ERRNC(retval);
    if ((retval = nc_def_dim(ncid, REC_NAME, NC_UNLIMITED, &dimids[0])))
-      ERR(retval);
+      ERRNC(retval);
 
    /*Define the netcdf variables */
    for (ivar=0;ivar<NVARS;ivar++) {
      if ((retval = nc_def_var(ncid, Names[ivar], NC_DOUBLE, NDIMS, 
 			      dimids, &varids[ivar])))
-       ERR(retval);
+       ERRNC(retval);
      if ((retval = nc_put_att_text(ncid, varids[ivar], "units" , 
 				   strlen(Units[ivar]), Units[ivar])))
-     ERR(retval);
+     ERRNC(retval);
      if ((retval = nc_put_att_text(ncid, varids[ivar], "long_name" , 
 				   strlen(Long_Names[ivar]), Long_Names[ivar])))
-     ERR(retval);
+     ERRNC(retval);
    }
    /* End define mode. */
    if ((retval = nc_enddef(ncid)))
-     ERR(retval);
+     ERRNC(retval);
    
    
    
    /* Close the file. */
    if ((retval = nc_close(ncid)))
-      ERR(retval);
+      ERRNC(retval);
    return(0);
 }
 
@@ -369,34 +552,34 @@ int savenc(char filename[],char Names[NVARS][STRLEN],
   size_t start[NDIMS], count[NDIMS];
   /* Create the file */
   if ((retval = nc_create(filename, NC_CLOBBER, &ncid)))
-    ERR(retval);
+    ERRNC(retval);
   
   /* Define the dimensions. The record dimension is defined to have
    * unlimited length - it can grow as needed. In this example it is
     * the time dimension.*/
   
   if ((retval = nc_def_dim(ncid, Y_NAME, SZY, &dimids[1])))
-      ERR(retval);
+      ERRNC(retval);
    if ((retval = nc_def_dim(ncid, X_NAME, SZX, &dimids[2])))
-     ERR(retval);
+     ERRNC(retval);
    if ((retval = nc_def_dim(ncid, REC_NAME, NC_UNLIMITED, &dimids[0])))
-     ERR(retval);
+     ERRNC(retval);
 
    /*Define the netcdf variables */
    for (ivar=0;ivar<NVARS;ivar++) {
      if ((retval = nc_def_var(ncid, Names[ivar], NC_DOUBLE, NDIMS, 
 			      dimids, &varids[ivar])))
-       ERR(retval);
+       ERRNC(retval);
      if ((retval = nc_put_att_text(ncid, varids[ivar], "units" , 
 				   strlen(Units[ivar]), Units[ivar])))
-       ERR(retval);
+       ERRNC(retval);
      if ((retval = nc_put_att_text(ncid, varids[ivar], "long_name" , 
 				   strlen(Long_Names[ivar]), Long_Names[ivar])))
-       ERR(retval);
+       ERRNC(retval);
    }
    /* End define mode. */
    if ((retval = nc_enddef(ncid)))
-     ERR(retval);
+     ERRNC(retval);
    
    /* These settings tell netcdf to write one timestep of data. (The
     setting of start[0] inside the loop below tells netCDF which
@@ -416,12 +599,12 @@ int savenc(char filename[],char Names[NVARS][STRLEN],
 	   for (ik=0;ik<6;ik++) 
 	     if ((retval = nc_put_vara_double(ncid, varids[ik], start, count, 
 					      &data[ik][it][0][0])))
-	       ERR(retval);
+	       ERRNC(retval);
 	 }
  
  /* Close the file. */
  if ((retval = nc_close(ncid)))
-     ERR(retval);
+     ERRNC(retval);
    return(0);
    
 }
