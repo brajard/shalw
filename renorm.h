@@ -105,7 +105,7 @@ void compute_Hinv (Matrix<YREAL,Symmetric, RowSymPacked>& Hinv,const Vector<YREA
       H(i,j) = DotProd(rowi,rowj); 
     }
   cout << H << endl;
-  //GetInverse(H);
+  GetInverse(H);
   cout << H << endl;
 
   
