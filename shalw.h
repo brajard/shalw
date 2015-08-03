@@ -150,13 +150,15 @@ short select_io(int indic, char *nmod, int sortie, int iaxe,
 	return(1);
 }
 
+
+
 void compute_adjoint() {
   if (lobs == NULL || nobs == 0) {
     fprintf(stderr,"compute_adjoint : no obs loaded");
     return;
   }
   
- 
+  
   for (int i = 0 ; i < nobs ; i++) {
     //Forward to initialise states
     //Needs to be done at each time step to have the good time
@@ -167,7 +169,10 @@ void compute_adjoint() {
     Yforward(-1, 0);
     
     erase_lobs();
-    lobs[i]->val = YS_Hfil(0,lobs[i]->Y,lobs[i]->X,lobs[i]->T)-1;
+
+    //Trick to compute adjoint (should also work for non-linear models)
+    lobs[i]->val = YS_Hfil(0,lobs[i]->Y,lobs[i]->X,lobs[i]->T);
+    YS_Hfil(0,lobs[i]->Y,lobs[i]->X,lobs[i]->T)++;
 
     Yobs_insert_data("Hfil",0,lobs[i]->Y,lobs[i]->X,0,lobs[i]->T,lobs[i]->val);
     Yrazgrad_all();  /* avant fct de cout et backprop : sur tous les pas de temps, raz de tous les gradients de tous les modules */

@@ -72,7 +72,7 @@ void renorm() {
    Y.Fill(1);
    //Compute Y = 1.*R*X + 1 
    // (-1 because obs is one below the real value)
-   MltAdd(1.0,Radj,Xc,-1.0,Y) ;
+   MltAdd(1.0,Radj,Xc,0.0,Y) ;
    cout << "computed: " << Y << endl ;
    cout << "loaded:" << Yobs << endl ;
 
@@ -240,10 +240,8 @@ void compute_Hinv (Matrix<YREAL,Symmetric, RowSymPacked>& Hinv,const Vector<YREA
     rowj.Nullify();
   }
 
- cout << Hinv << endl;
 
   GetInverse(Hinv);
-  cout << Hinv << endl;
 
   
 }
