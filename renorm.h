@@ -1,4 +1,14 @@
-void compute_Hinv(Matrix<YREAL,Symmetric, RowSymPacked>& Hinv,const Vector<YREAL>& phi, Matrix<YREAL>& Radj);
+void compute_Hinv(Matrix<YREAL,Symmetric, RowSymPacked>& Hinv,const Vector<YREAL>& phi, Matrix<YREAL>& Radj, Matrix<YREAL>& Rphi);
+void compute_Conv (Vector <YREAL> &Conv, Matrix<YREAL,Symmetric, RowSymPacked>& Hinv, Vector <YREAL> &phi,  Matrix<YREAL>& Rphi);
+void compute_minmax(YREAL *pconv_min, YREAL *pconv_max, Vector <YREAL> &Conv);
+void compute_phi (Vector <YREAL> &phi, Vector <YREAL> &Conv);
+void compute_Rphi ( Matrix<YREAL>& Rphi, Vector <YREAL> &phi, const Matrix<YREAL>& Radj);
+int get_indok (const Matrix <YREAL>& Radj, Vector <int> &indok);
+void extract_R (Matrix <YREAL> &Rext, const Matrix <YREAL>& Radj, Vector <int> &indok);
+void extract_R (Matrix <YREAL> &Rext, const Matrix <YREAL>& Radj, Vector <int> &indok, int nex);
+void compute_sol(Vector <YREAL> &X, const Matrix <YREAL>& Rphi, const Matrix <YREAL,Symmetric, RowSymPacked>& Hinv, const Vector <YREAL> &Yobs);
+#define SMALL 1e-7
+
 
 void test_seldon() {
     cout << "Seldon: compilation test with Blas" << endl;
@@ -66,47 +76,174 @@ void renorm() {
    cout << "computed: " << Y << endl ;
    cout << "loaded:" << Yobs << endl ;
 
-   Xc.Fill(0);
-   //Inverse of H
-   Matrix <YREAL,Symmetric, RowSymPacked> Hinv(Yobs.GetM(),Yobs.GetM());
-   Vector <YREAL> phi(TotS);
-   Vector <YREAL> Ecl(TotS);
-   //Conv = r*H-1*r
-   Vector <YREAL> Conv(TotS);
+  
+   // Select elements in the field (max of adjoint > SMALL)   
+   Vector <int> indok ;
+   Matrix <YREAL> Rext ;
+   int nex = get_indok(Radj,indok);
+   extract_R (Rext,Radj,indok, nex);
+
+
+   Radj.WriteText("Radj.dat");
+   Rext.WriteText("Rext.dat");
+   indok.WriteText("indok.dat");
+   Xc.WriteText("Xt.dat");
+   Y.WriteText("Y.dat");
    
+   Xc.Fill(0);
+   Vector <YREAL> Xa(nex);
+//Inverse of H
+   Matrix <YREAL,Symmetric, RowSymPacked> Hinv(Yobs.GetM(),Yobs.GetM());
+   Vector <YREAL> phi(nex);
+   Matrix <YREAL> Rphi(Rext);
+   Vector <YREAL> Ecl(nex);
+   //Conv = r*H-1*r
+   Vector <YREAL> Conv(nex);
+   
+   //Solution without renormalization
+   Hinv.SetIdentity();
+   compute_sol(Xa,Rphi,Hinv,Yobs);
+   Xa.WriteText("Xa_init.dat");
+
+
    //Initialisation
    int iter =1 ;
-   int conv_min = 0 ;
-   int conv_max = 1 ;
+   YREAL conv_min = 0 ;
+   YREAL conv_max = 1 ;
    phi.Fill(1);
-   compute_Hinv ( Hinv, phi, Radj ) ;
-   /*
-   compute_Conv ( Conv, Hinv, phi, Radj );
+   compute_Hinv ( Hinv, phi, Rext , Rext) ;
+   compute_Conv ( Conv, Hinv, phi, Rext );
    compute_minmax (&conv_min, &conv_max, Conv);
+   cout << "min=" << conv_min <<", max=" << conv_max <<endl;
+   
 
-   while(conv_min < 0.98 && conv_max>0.99) {
+
+   while((conv_min < 0.98 || conv_max>0.99) && iter < 20) {
      compute_phi  ( phi, Conv) ;
-     compute_Hinv ( Hinv, phi, Radj ) ;
-     compute_Conv ( Conv, Hinv, phi, Radj );
+     compute_Rphi ( Rphi, phi, Rext) ;
+     compute_Hinv ( Hinv, phi, Rext , Rphi ) ;
+     compute_Conv ( Conv, Hinv, phi, Rphi );
      compute_minmax (&conv_min, &conv_max, Conv);
+
      iter ++;
+   cout << "iter " << iter << " min=" << conv_min <<", max=" << conv_max <<endl;
+
    } //while
-   */
+   compute_sol(Xa,Rphi,Hinv,Yobs);
+   Xa.WriteText("Xa_fin.dat");
+
 }
+
+void extract_R (Matrix <YREAL> &Rext, const Matrix <YREAL>& Radj, Vector <int> &indok) {
+  int nex = DotProd(indok,indok);
+  extract_R (Rext,Radj,indok, nex);
+}
+
+void compute_sol(Vector <YREAL> &X, const Matrix <YREAL>& Rphi, const Matrix <YREAL,Symmetric, RowSymPacked>& Hinv, const Vector <YREAL> &Yobs){
+  Matrix <YREAL> M(Rphi.GetM(),Rphi.GetN());
+  MltAdd(1.0,Hinv,Rphi,0.0,M) ;
+  MltAdd(1.0,SeldonTrans,M,Yobs,0.0,X);
+}
+
+void extract_R (Matrix <YREAL> &Rext, const Matrix <YREAL>& Radj, Vector <int> &indok, int nex) {
+  cout << "Number of grod point seen : " << nex << endl;
+  int n = Radj.GetN();
+  int m = Radj.GetM();
   
-void compute_Hinv (Matrix<YREAL,Symmetric, RowSymPacked>& Hinv,const Vector<YREAL>& phi, Matrix<YREAL>& Radj) {
-  Matrix <YREAL,Symmetric, RowSymPacked> H(Hinv.GetM(),Hinv.GetN());
-  Vector <YREAL> rowi(phi.GetLength()), rowj(phi.GetLength()) ;
-  for (int i = 0 ; i< Hinv.GetM() ; i++) 
-    for (int j= 0 ; j<= i ; j++ ) {
-      GetRow(Radj,i,rowi);
-      GetRow(Radj,j,rowj);
-      
-      H(i,j) = DotProd(rowi,rowj); 
-    }
-  cout << H << endl;
-  GetInverse(H);
-  cout << H << endl;
+  Rext.Reallocate(m,nex);
+  Vector <YREAL> col;
+  int   jex = 0;
+  for (int j = 0 ; j < n ; j++) 
+    if (indok(j) == 1) {
+      GetCol(Radj,j,col);
+      SetCol(col,jex,Rext);
+      jex++;
+  }
+}
+
+int get_indok (const Matrix <YREAL>& Radj, Vector <int> &indok) {
+  //Return a vector of size n with 0 if the grid point is not seen and 1 otherwise
+int n = Radj.GetN(); //nb gridpoint
+  indok.Reallocate(n);
+  Vector <YREAL> col ;
+  int nex=0;
+  int imax;
+  for (int j = 0 ; j < n ; j++) {
+     GetCol(Radj,j,col);
+     imax = GetMaxAbsIndex(col);
+     if (fabs(col(imax)) <= SMALL)
+       indok(j) = 0 ;
+     else {
+       indok(j) = 1 ;  
+       nex++;
+     }
+  }
+  return(nex);
+}
+
+void compute_Rphi ( Matrix<YREAL>& Rphi, Vector <YREAL> &phi, const Matrix<YREAL>& Radj) {
+  int n = Radj.GetN(); //nb gridpoint
+  Vector <YREAL> col;
+  for (int j = 0 ; j < n ; j++) {
+    GetCol(Radj,j,col);
+    Mlt(1./phi(j),col);
+    SetCol(col,j,Rphi);
+  }
+}
+
+void compute_phi (Vector <YREAL> &phi, Vector <YREAL> &Conv) {
+  for (int i=0 ; i < phi.GetLength() ; i++) {
+    phi(i) = phi(i)*sqrt(Conv(i));
+  }
+}
+
+void compute_minmax(YREAL *pconv_min, YREAL *pconv_max, Vector <YREAL> &Conv) {
+  *pconv_min = Conv(0);
+  *pconv_max = Conv(0);
+  for (int i = 1 ; i < Conv.GetLength() ; i++) {
+    if (Conv(i) < *pconv_min) *pconv_min = Conv(i);
+    if (Conv(i) > *pconv_max) *pconv_max = Conv(i);
+  }
+}
+
+void compute_Conv (Vector <YREAL> &Conv, Matrix<YREAL,Symmetric, RowSymPacked>& Hinv, Vector <YREAL> &phi,  Matrix<YREAL>& Rphi) {
+  int m = Rphi.GetM(); //nb obs
+  int n = Rphi.GetN(); //nb gridpoint
+  Vector <YREAL> row1, col2 ;
+  Matrix <YREAL, General, ColMajor> HinvR(m,n);
+  MltAdd(1.0,Hinv,Rphi,0,HinvR);
+  for (int i = 0 ; i < n ; i++) {
+    GetCol(Rphi,i,row1);
+    GetCol(HinvR,i,col2);
+    Conv(i) = sqrt(DotProd(row1,col2));
+  }  
+
+}
+
+void compute_Hinv (Matrix<YREAL,Symmetric, RowSymPacked>& Hinv,const Vector<YREAL>& phi, Matrix<YREAL>& Radj, Matrix<YREAL>& Rphi) {
+  
+  Vector <YREAL> rowi, rowj;
+  
+  Hinv.Zero();
+
+  int m = Radj.GetM(); //nb obs
+  int n = Radj.GetN(); //nb gridpoint
+  for (int i = 0 ; i< m ; i++ ) 
+  for (int j= 0 ; j<= i ; j++ ) {
+    //Don't copy memory
+    rowi.SetData(n, &Radj(i,0));
+    rowj.SetData(n, &Rphi(j,0));
+    Hinv(i,j) = DotProd(rowi,rowj);
+
+    //Make the pointer null to avoid free of memory in Radj
+    rowi.Nullify();
+    rowj.Nullify();
+  }
+
+ cout << Hinv << endl;
+
+  GetInverse(Hinv);
+  cout << Hinv << endl;
 
   
 }
