@@ -65,7 +65,19 @@ setm_ddf1 1.0
 
 read_lobs obs.dat
 compute_adjoint
+xset_maxiter 0
 renorm
+set_sol
+set_modeltime 0
+FORWARD
+xsavenc state_0.nc state
+xgauss 15 250000 25000 250000 25000
+xset_maxiter 20
+renorm
+set_sol
+set_modeltime 0
+FORWARD
+xsavenc state_a.nc state
 goto fin
 
 RUNM

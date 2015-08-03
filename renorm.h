@@ -45,6 +45,28 @@ void get_adjoint(int i) {
     }
 }
 
+void set_sol() {
+  //Put Sol field in YAO
+  int iall =0;
+  int iext = 0;
+     for (int iy=0;iy<YA1_Soce;iy++)
+      for (int ix=0;ix<YA2_Soce;ix++)
+	{
+	  if (indok(iall) == 1) {
+	    YS_Hfil(0,iy,ix,0) = Xa(iext);
+	    iext++;
+	  }
+	  else
+	    YS_Hfil(0,iy,ix,0) = 0;
+	  iall ++;
+	  YS_Hphy(0,iy,ix,0) = 0;
+	  YS_Uphy(0,iy,ix,0) = 0;
+	  YS_Vphy(0,iy,ix,0) = 0;
+	  YS_Vfil(0,iy,ix,0) = 0;
+	  YS_Ufil(0,iy,ix,0) = 0;
+	}
+}
+
 void renorm() {
 
   //Reallocate memory 
@@ -78,7 +100,6 @@ void renorm() {
 
   
    // Select elements in the field (max of adjoint > SMALL)   
-   Vector <int> indok ;
    Matrix <YREAL> Rext ;
    int nex = get_indok(Radj,indok);
    extract_R (Rext,Radj,indok, nex);
@@ -91,7 +112,7 @@ void renorm() {
    Y.WriteText("Y.dat");
    
    Xc.Fill(0);
-   Vector <YREAL> Xa(nex);
+   Xa.Reallocate(nex);
 //Inverse of H
    Matrix <YREAL,Symmetric, RowSymPacked> Hinv(Yobs.GetM(),Yobs.GetM());
    Vector <YREAL> phi(nex);
@@ -101,24 +122,25 @@ void renorm() {
    Vector <YREAL> Conv(nex);
    
    //Solution without renormalization
-   Hinv.SetIdentity();
+   phi.Fill(1);
+   compute_Hinv ( Hinv, phi, Rext , Rext) ;
    compute_sol(Xa,Rphi,Hinv,Yobs);
    Xa.WriteText("Xa_init.dat");
-
+   if (maxiter!=0) {
+     
 
    //Initialisation
    int iter =1 ;
    YREAL conv_min = 0 ;
    YREAL conv_max = 1 ;
-   phi.Fill(1);
-   compute_Hinv ( Hinv, phi, Rext , Rext) ;
+ 
    compute_Conv ( Conv, Hinv, phi, Rext );
    compute_minmax (&conv_min, &conv_max, Conv);
    cout << "min=" << conv_min <<", max=" << conv_max <<endl;
    
 
 
-   while((conv_min < 0.98 || conv_max>0.99) && iter < 20) {
+   while((conv_min < 0.98 || conv_max>0.99) && iter <  maxiter ) {
      compute_phi  ( phi, Conv) ;
      compute_Rphi ( Rphi, phi, Rext) ;
      compute_Hinv ( Hinv, phi, Rext , Rphi ) ;
@@ -131,7 +153,7 @@ void renorm() {
    } //while
    compute_sol(Xa,Rphi,Hinv,Yobs);
    Xa.WriteText("Xa_fin.dat");
-
+   } // if Y3nsim !=0
 }
 
 void extract_R (Matrix <YREAL> &Rext, const Matrix <YREAL>& Radj, Vector <int> &indok) {

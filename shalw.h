@@ -73,7 +73,9 @@ Matrix<YREAL> Radj ;
 //Observation vector
 Vector<YREAL> Yobs ;
 Vector<YREAL> Xc ;
-
+Vector<YREAL> Xa ; //Solution (in reduced space)
+Vector<int> indok ; //Valid index in control vector
+int maxiter = 0;
 //Size of the control space :
 const int TotS = SZY *SZX ;
 #endif //ifdef RENORM
@@ -204,6 +206,9 @@ void xgauss(int argc, char *argv[]){
 			    *(exp(-pow((j*dy-gmy)/gsy,2) /2.));
 }
 
+void xset_maxiter(int argc, char *argv[]) {
+    maxiter = atoi(argv[1]);
+  }
 void xvitgeo(){
 	double gf, gfh;
 #ifdef GEOSTROPHY

@@ -99,3 +99,5 @@ insert_fct arg xsavenc
 insert_fct arg read_lobs
 insert_fct     compute_adjoint
 insert_fct     renorm
+insert_fct     set_sol
+insert_fct arg xset_maxiter
