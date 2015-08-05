@@ -13,3 +13,5 @@ HfilT
 gmon.out
 prof.txt
 .TERM_xterm
+*.png
+out*.txt

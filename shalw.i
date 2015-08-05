@@ -34,21 +34,11 @@ xdisplay
 #testdf 50 50 1 3 R %0.000001 0.0001
 
 set_iosep
-#savestate Toce 1 ij 5% A  ./HfilT
-#savestate Hfil 1 ij 5% A 3 ./HfilT
-#savestate Ufil 1 ij 5% A 0 ./UfilT
-#savestate Vfil 1 ij 5% A 0 ./VfilT
-#savestate Hphy 1 ij 5% A 0 ./HphyT
-#savestate Uphy 1 ij 5% A 0 ./UphyT
-#savestate Vphy 1 ij 5% A 0 ./VphyT
 
-#!gnuplot hsplot.gp
-#goto fin
-#outoobs Hfil 1 SZA
 
-xobs Hfil 50 50 300 -1
-lobs
-#xgauss 5 125000 12500 125000 1000
+
+xsavenc state_true.nc state
+
 cost lms 0.5
 #testof 0.02 10 10 8
 print_cost ON
@@ -58,7 +48,7 @@ setm_io 6
 setm_mode 0
 #set_nbiter 100
 set_nbiter 20
-setm_nsim 0
+setm_nsim 20
 setm_dxmin 1.0e-12
 setm_epsg 1.0e-12
 setm_ddf1 1.0
@@ -80,7 +70,10 @@ FORWARD
 xsavenc state_a.nc state
 goto fin
 
-RUNM
+RUN
+xsavenc state_4dvar.nc state
+
+goto fin
 
 xdisplay
 #savegrad grad.dat
