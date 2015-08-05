@@ -152,6 +152,7 @@ void renorm() {
 
    } //while
    compute_sol(Xa,Rphi,Hinv,Yobs);
+   phi.WriteText("Phi.dat");
    Xa.WriteText("Xa_fin.dat");
    } // if Y3nsim !=0
 }
