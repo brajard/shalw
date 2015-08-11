@@ -12,7 +12,7 @@ load indok.dat
 phi2 = nan*ones(100,100);
 phi2(indok == 1) = Phi ;
 figure(2)
-imagesc(phi2'.^0.25);
+imagesc(phi2'.^0.5);
 title('Square root of Eclairement');
 colorbar
 colormap('gray')
