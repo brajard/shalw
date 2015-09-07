@@ -1,8 +1,11 @@
+#define LIN
+
 defval SZX 100
 defval SZY 100
 defval SZU 1
 defval SZT 300
 defval SZA 301
+defval K_LIN
 
 hat_name "shalw.h" "renorm.h" 
 
@@ -18,7 +21,7 @@ traj Toce M SZU SZT
 space Soce M SZX SZY Toce
 
 modul Hfil space Soce input 3 output 1 tempo cout target
-modul Ufil space Soce input 3 output 1 tempo
+modul Ufil space Soce input 3 output 1 tempo target
 modul Vfil space Soce input 3 output 1 tempo
 modul Hphy space Soce input 5 output 1 tempo
 modul Uphy space Soce input 9 output 1 tempo

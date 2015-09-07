@@ -15,3 +15,4 @@ prof.txt
 .TERM_xterm
 *.png
 out*.txt
+*_tmp.*
