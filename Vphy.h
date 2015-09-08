@@ -8,11 +8,16 @@ forward(YREAL vfil, YREAL lamu, YREAL grady, YREAL hzp, YREAL hzm)
 #endif
 
   }
-  else
+  else {
+    YREAL coef = 1 ;
     if(Yj == 0)
       YS1 = 0;
-    else 
-      YS1 = vfil + dedt*(-lamu - grady/dy  -dissip*vfil);
+    else {
+      if (Yi ==0)
+	coef = 2 ; //to compensate the vorticity equal to zero
+      YS1 = vfil + dedt*(-coef*lamu - grady/dy  -dissip*vfil);
+    }
+  }
 }
 
 backward(YREAL vfil, YREAL lamu, YREAL grady, YREAL hzp, YREAL hzm)
@@ -25,11 +30,15 @@ backward(YREAL vfil, YREAL lamu, YREAL grady, YREAL hzp, YREAL hzm)
     YJ1I1 = 1 ;
 #endif  
   }
-  else
-	if(Yj>0)
-	{
-	  YJ1I1 = 1-dedt*dissip ;
-	  YJ1I2 = -dedt ;
-	  YJ1I3 = dedt/dy ;
-	}  
+ else {
+   YREAL coef = 1;
+   if(Yj>0)
+     {
+       if (Yi == 0)
+	 coef = 2;
+       YJ1I1 = 1-dedt*dissip ;
+       YJ1I2 = -coef*dedt ;
+       YJ1I3 = dedt/dy ;
+     }  
+ }
 }
