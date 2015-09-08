@@ -38,7 +38,7 @@ set_iosep
 
 
 xsavenc state_true.nc state
-
+goto fin
 cost lms 0.5
 #testof 0.02 10 10 8
 print_cost ON

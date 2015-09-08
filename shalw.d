@@ -23,29 +23,19 @@ space Soce M SZX SZY Toce
 modul Hfil  space Soce input 3 output 1 tempo cout target
 modul Ufil  space Soce input 3 output 1 tempo target
 modul Vfil  space Soce input 3 output 1 tempo
-modul Hphy  space Soce input 5 output 1 tempo
-modul Uphy  space Soce input 9 output 1 tempo
-modul Vphy  space Soce input 9 output 1 tempo
+modul Hphy  space Soce input 3 output 1 tempo
+modul Uphy  space Soce input 5 output 1 tempo
+modul Vphy  space Soce input 5 output 1 tempo
 modul Hz    space Soce input 4 output 1 tempo
 modul Vit   space Soce input 5 output 1 tempo
 modul Vor   space Soce input 4 output 1 tempo
 modul Lamu  space Soce input 6 output 1 tempo
-modul Lamv  clonof Lamu
+modul Lamv  space Soce clonof Lamu
 modul Gradx space Soce input 2 output 1 tempo
-modul Grady clonof Gradx
+modul Grady space Soce clonof Gradx
 modul Mcu   space Soce input 5 output 1 tempo
-modul Mcv   clonof Mcu
+modul Mcv   space Soce clonof Mcu
 
-ctin Hphy 1 from Hfil 1 i   j   t-1
-ctin Hphy 2 from Uphy 1 i   j   t-1
-ctin Hphy 3 from Uphy 1 i-1 j   t-1
-ctin Hphy 4 from Vphy 1 i   j+1 t-1
-ctin Hphy 5 from Vphy 1 i   j   t-1
-
-ctin Hz   1 from Hphy 1 i   j   t
-ctin Hz   2 from Hphy 1 i+1 j   t
-ctin Hz   3 from Hphy 1 i   j-1 t
-ctin Hz   4 from Hphy 1 i+1 j-1 t
 
 ctin Lamu 1 from Vor  1 i-1 j   t-1
 ctin Lamu 2 from Vor  1 i   j t-1
@@ -61,6 +51,15 @@ ctin Lamv 4 from Vphy 1 i   j+1 t-1
 ctin Lamv 5 from Vphy 1 i+1 j   t-1
 ctin Lamv 6 from Vphy 1 i+1 j+1 t-1
 
+ctin Hphy 1 from Hfil 1 i   j   t-1
+ctin Hphy 2 from Mcu  1 i   j   t
+ctin Hphy 3 from Mcv  1 i   j   t
+
+ctin Hz   1 from Hphy 1 i   j   t
+ctin Hz   2 from Hphy 1 i+1 j   t
+ctin Hz   3 from Hphy 1 i   j-1 t
+ctin Hz   4 from Hphy 1 i+1 j-1 t
+
 ctin Gradx 1 from Vit 1 i+1 j   t-1
 ctin Gradx 2 from Vit 1 i   j   t-1
 
@@ -73,31 +72,23 @@ ctin Mcu  3 from Hphy 1 i   j   t-1
 ctin Mcu  4 from Hphy 1 i+1 j   t-1
 ctin Mcu  5 from Hphy 1 i-1 j   t-1
 
-ctin Mcu  1 from Vphy 1 i   j+1 t-1
-ctin Mcu  2 from Vphy 1 i   j   t-1
-ctin Mcu  3 from Hphy 1 i   j+1 t-1
-ctin Mcu  4 from Hphy 1 i   j   t-1
-ctin Mcu  5 from Hphy 1 i-1 j-1 t-1
+ctin Mcv  1 from Vphy 1 i   j+1 t-1
+ctin Mcv  2 from Vphy 1 i   j   t-1
+ctin Mcv  3 from Hphy 1 i   j   t-1
+ctin Mcv  4 from Hphy 1 i   j+1 t-1
+ctin Mcv  5 from Hphy 1 i   j-1 t-1
 
-ctin Uphy 1 from Ufil 1 i   j   t-1
-ctin Uphy 2 from Hphy 1 i+1 j   t-1
-ctin Uphy 3 from Hphy 1 i   j   t-1
-ctin Uphy 4 from Vphy 1 i   j   t-1
-ctin Uphy 5 from Vphy 1 i   j+1 t-1
-ctin Uphy 6 from Vphy 1 i+1 j   t-1
-ctin Uphy 7 from Vphy 1 i+1 j+1 t-1
-ctin Uphy 8 from Hz   1 i   j+1 t
-ctin Uphy 9 from Hz   1 i   j   t
+ctin Uphy 1 from Ufil  1 i   j   t-1
+ctin Uphy 2 from Lamv  1 i   j   t
+ctin Uphy 3 from Gradx 1 i   j   t
+ctin Uphy 4 from Hz   1 i   j+1 t
+ctin Uphy 5 from Hz   1 i   j   t
 
-ctin Vphy 1 from Vfil 1 i   j   t-1
-ctin Vphy 2 from Hphy 1 i   j   t-1
-ctin Vphy 3 from Hphy 1 i   j-1 t-1
-ctin Vphy 4 from Uphy 1 i-1 j-1 t-1
-ctin Vphy 5 from Uphy 1 i-1 j   t-1
-ctin Vphy 6 from Uphy 1 i   j-1 t-1
-ctin Vphy 7 from Uphy 1 i   j   t-1
-ctin Vphy 8 from Hz   1 i   j   t
-ctin Vphy 9 from Hz   1 i-1 j   t
+ctin Vphy 1 from Vfil  1 i   j   t-1
+ctin Vphy 2 from Lamu  1 i   j   t
+ctin Vphy 3 from Grady 1 i   j   t
+ctin Vphy 4 from Hz    1 i   j   t
+ctin Vphy 5 from Hz    1 i-1 j   t
 
 ctin Hfil 1 from Hfil 1 i   j   t-1
 ctin Hfil 2 from Hphy 1 i   j   t-1
@@ -125,6 +116,8 @@ ctin Vor  4 from Uphy 1 i   j-1 t
 
 order modinspace Soce
   order YB1 YA2
+  	Mcu
+	Mcv
         Hphy
 	Hz 
    forder
@@ -133,8 +126,6 @@ order modinspace Soce
 	Lamv
 	Gradx
 	Grady
-	Mcu
-	Mcv
 	Uphy 
 	Vphy
 	Hfil 

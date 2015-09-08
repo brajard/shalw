@@ -1,18 +1,12 @@
-forward(YREAL a, YREAL b, YREAL c, YREAL d, YREAL e)
+forward(YREAL hfil, YREAL mcu, YREAL mcv)
 {
-//printf("(d-e)/dy = %f", (d-e)/dy );
-//printf("(b-c)/dx = %f", (b-c)/dx );
-//printf("a = %f  ", a );
-	YS1 = a - dedt*hmoy*((b-c)/dx + (d-e)/dy);
-//printf("YS1 = %f  ", YS1 );
+	YS1 = hfil - dedt*(mcu/dx+mcv/dy);
 }
 
 
-backward(YREAL a, YREAL b, YREAL c, YREAL d, YREAL e)
+backward(YREAL hfil, YREAL mcu, YREAL mcv)
 {
 	YJ1I1 = 1;
-	YJ1I2 = - (dedt*hmoy)/dx;
-	YJ1I3 = - YJ1I2;
-	YJ1I4 = - (dedt*hmoy)/dy;
-	YJ1I5 = - YJ1I4;
+	YJ1I2 = -dedt/dx;
+	YJ1I3 = -dedt/dy;
 }
