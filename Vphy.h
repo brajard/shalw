@@ -38,7 +38,7 @@ backward(YREAL vfil, YREAL lamu, YREAL grady, YREAL hzp, YREAL hzm)
 	 coef = 2;
        YJ1I1 = 1-dedt*dissip ;
        YJ1I2 = -coef*dedt ;
-       YJ1I3 = dedt/dy ;
+       YJ1I3 = -dedt/dy ;
      }  
  }
 }

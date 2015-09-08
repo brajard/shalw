@@ -26,6 +26,6 @@ backward(YREAL up, YREAL um, YREAL hc, YREAL hp, YREAL hm)
   YJ1I1 = dylindup + dydup ;
   YJ1I2 = dylindum + dydum ;
   YJ1I3 = dydhc ;
-  YJ1I4 = 0.5*up;
-  YJ1I5 = -0.5*up;
+  YJ1I4 = dydhp;
+  YJ1I5 = dydhm;
 }
