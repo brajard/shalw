@@ -27,6 +27,11 @@ xgauss 15 250000 25000 250000 25000
 xdisplay
 set_modeltime 0
 FORWARD
+xsavenc state_true.nc state
+
+read_lobs obs.dat
+compute_adjoint
+
 #xdisplay
 #set_modeltime 0
 #FORWARD
@@ -36,9 +41,9 @@ xdisplay
 set_iosep
 
 
-
-xsavenc state_true.nc state
+xsavenc grad_true.nc grad
 goto fin
+
 cost lms 0.5
 #testof 0.02 10 10 8
 print_cost ON
