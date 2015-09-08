@@ -1,4 +1,4 @@
-#define LIN
+//#define LIN
 
 defval SZX 100
 defval SZY 100
@@ -79,6 +79,15 @@ ctin Mcu  3 from Hphy 1 i   j+1 t-1
 ctin Mcu  4 from Hphy 1 i   j   t-1
 ctin Mcu  5 from Hphy 1 i-1 j-1 t-1
 
+ctin Uphy 1 from Ufil 1 i   j   t-1
+ctin Uphy 2 from Hphy 1 i+1 j   t-1
+ctin Uphy 3 from Hphy 1 i   j   t-1
+ctin Uphy 4 from Vphy 1 i   j   t-1
+ctin Uphy 5 from Vphy 1 i   j+1 t-1
+ctin Uphy 6 from Vphy 1 i+1 j   t-1
+ctin Uphy 7 from Vphy 1 i+1 j+1 t-1
+ctin Uphy 8 from Hz   1 i   j+1 t
+ctin Uphy 9 from Hz   1 i   j   t
 
 ctin Vphy 1 from Vfil 1 i   j   t-1
 ctin Vphy 2 from Hphy 1 i   j   t-1
@@ -89,16 +98,6 @@ ctin Vphy 6 from Uphy 1 i   j-1 t-1
 ctin Vphy 7 from Uphy 1 i   j   t-1
 ctin Vphy 8 from Hz   1 i   j   t
 ctin Vphy 9 from Hz   1 i-1 j   t
-
-ctin Uphy 1 from Ufil 1 i   j   t-1
-ctin Uphy 2 from Hphy 1 i+1 j   t-1
-ctin Uphy 3 from Hphy 1 i   j   t-1
-ctin Uphy 4 from Vphy 1 i   j   t-1
-ctin Uphy 5 from Vphy 1 i   j+1 t-1
-ctin Uphy 6 from Vphy 1 i+1 j   t-1
-ctin Uphy 7 from Vphy 1 i+1 j+1 t-1
-ctin Uphy 8 from Hz   1 i   j+1 t
-ctin Uphy 9 from Hz   1 i   j   t
 
 ctin Hfil 1 from Hfil 1 i   j   t-1
 ctin Hfil 2 from Hphy 1 i   j   t-1
