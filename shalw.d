@@ -1,4 +1,4 @@
-#define LIN
+//#define LIN
 
 defval SZX 100
 defval SZY 100
