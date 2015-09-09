@@ -22,7 +22,9 @@ xgauss 15 250000 25000 250000 25000
 
 #xvitgeo
 
-#testdf 10 10 1 2 1 %0.000001 0.0001
+#testdf 10 10 1 4 r %0.000001 0.0001
+
+#goto fin
 #testdf 50 10 1 10 1 %0.000001 0.0001
 xdisplay
 set_modeltime 0

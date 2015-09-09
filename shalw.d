@@ -5,7 +5,7 @@ defval SZY 100
 defval SZU 1
 defval SZT 300
 defval SZA 301
-defval K_LIN
+//defval K_LIN
 
 hat_name "shalw.h" "renorm.h" 
 

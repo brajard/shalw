@@ -5,7 +5,7 @@ forward(YREAL up, YREAL um, YREAL hc, YREAL hp, YREAL hm)
   ylin = hmoy*(up - um);
   
 #ifndef K_LIN
-  ynonlin = 0.5*(up*(hp+hc) - um(hm+hc));
+  ynonlin = 0.5*(up*(hp+hc) - um*(hm+hc));
 #endif
   YS1 = ylin + ynonlin ;
 }
