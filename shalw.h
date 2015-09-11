@@ -197,9 +197,20 @@ void xdisplay(){
 }
 
 void xgauss(int argc, char *argv[]){
+
 	gb = atof(argv[1]);
-	gmx = atof(argv[2]); gsx = atof(argv[3]);
-	gmy = atof(argv[4]); gsy = atof(argv[5]);
+	if (argc==2) {
+	  gmx = SZX*dx / 2 ;
+	  gmy = SZY*dy / 2 ;
+	  gsx = SZX*dx / 20 ;
+	  gsy = SZY*dy / 20 ;
+	}
+	else
+	  {
+
+	    gmx = atof(argv[2]); gsx = atof(argv[3]);
+	    gmy = atof(argv[4]); gsy = atof(argv[5]);
+	  }
         for (int j = 0; j<SZY; j++)
 	  for (int i = 0; i<SZX; i++)
 	   YS_Hfil(0,i,j,0) = gb*(exp( -pow((i*dx-gmx)/gsx,2) /2.))
