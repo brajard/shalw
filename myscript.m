@@ -93,7 +93,88 @@ imagesc(H2',cax);
 title('Height at t=300 (reference)');
 print -dpng 'pseudoinv-sol.png'
 
+figure(5);
+cax= [-1 1];
+cmap=scol_dif(50);
+subplot(2,2,1)
+imagesc(H0(:,:,1)-Htrue(:,:,1),cax);
+title('error pseudo-inv (t=0)');
+colormap(cmap)
+colorbar
 
+subplot(2,2,2)
+imagesc(H0(:,:,end)-Htrue(:,:,end),cax);
+title('error pseudo-inv (t=300)');
+
+colormap(cmap)
+colorbar
+
+subplot(2,2,3)
+imagesc(Ha(:,:,1)-Htrue(:,:,1),cax);
+title('error renorm (t=0)');
+
+colormap(cmap)
+colorbar
+
+subplot(2,2,4)
+imagesc(Ha(:,:,end)-Htrue(:,:,end),cax);
+title('error renorm (t=300)');
+
+colormap(cmap)
+colorbar
+print -dpng 'error_H.png'
+
+Utrue = ncread('state_true.nc','Ufil');
+U0    = ncread('state_0.nc','Ufil');
+Ua    = ncread('state_a.nc','Ufil');
+figure(6)
+cax=[-0.03 0.03];
+
+subplot(2,2,1)
+H2 = U0(:,:,2);
+imagesc(H2',cax);
+title('Initial U (psuedo-inv)')
+
+subplot(2,2,2);
+H2 = U0(:,:,end);
+imagesc(H2',cax);
+title('U at t=300 (pseudo-inv)');
+
+subplot(2,2,3)
+H2 = Utrue(:,:,2);
+imagesc(H2',cax);
+title('Initial U (reference)')
+colorbar('horiz')
+subplot(2,2,4);
+H2 = Utrue(:,:,end);
+imagesc(H2',cax);
+title('U at t=300 (reference)');
+print -dpng 'pseudoinv-sol-U.png'
+
+
+figure(7)
+cax=[-0.03 0.03];
+
+subplot(2,2,1)
+H2 = Ua(:,:,2);
+imagesc(H2',cax);
+title('Initial U (renorm)')
+
+subplot(2,2,2);
+H2 = Ua(:,:,end);
+imagesc(H2',cax);
+title('U at t=300 (renorm)');
+
+subplot(2,2,3)
+H2 = Utrue(:,:,2);
+imagesc(H2',cax);
+title('Initial U (reference)')
+colorbar('horiz')
+subplot(2,2,4);
+H2 = Utrue(:,:,end);
+imagesc(H2',cax);
+title('U at t=300 (reference)');
+print -dpng 'renorm-sol-U.png'
 
 if (0)
 load Y.dat
