@@ -1,9 +1,12 @@
 straj
 
-xivg dt 1.50e3
-xivg dx 5000
-xivg dy 5000
+#xivg dt 1.50e3
+#xivg dx 5000
+#xivg dy 5000
 
+xivg dt 800
+xivg dx 2000
+xivg dy 2000
 
 #xivg dt 1000
 #xivg dx 4000
@@ -13,12 +16,13 @@ xivg grav 0.01
 xivg dissip 0.00001
 #xivg dissip 0
 xivg alpha 0.15
-xivg hmoy 100
+xivg hmoy 100 
 
 #xgauss 15 25000 2500 25000 2500
 
 #xgauss 15 200000 12500 200000 12500
-xgauss 15 250000 25000 250000 25000
+#xgauss 15 250000 25000 250000 25000
+xgauss 15 15000 15000
 
 #xvitgeo
 
@@ -29,7 +33,9 @@ xgauss 15 250000 25000 250000 25000
 xdisplay
 set_modeltime 0
 FORWARD
+xdisplay
 xsavenc state_true.nc state
+goto fin
 
 read_lobs obs.dat
 compute_adjoint
