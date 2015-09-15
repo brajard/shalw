@@ -1,4 +1,5 @@
-#define GEOSTROPHY
+//#define GEOSTROPHY
+
 #define RENORM
 #define USE_NETCDF
 
@@ -206,15 +207,22 @@ void xgauss(int argc, char *argv[]){
 	  gsy = SZY*dy / 20 ;
 	}
 	else
-	  {
-
-	    gmx = atof(argv[2]); gsx = atof(argv[3]);
-	    gmy = atof(argv[4]); gsy = atof(argv[5]);
+	  if (argc==4) {
+	    gmx = SZX*dx / 2 ;
+	    gmy = SZY*dy / 2 ;
+	    gsx = atof(argv[2]);
+	    gsy = atof(argv[3]);
 	  }
+	  else
+	    {
+	      
+	      gmx = atof(argv[2]); gsx = atof(argv[3]);
+	      gmy = atof(argv[4]); gsy = atof(argv[5]);
+	    }
         for (int j = 0; j<SZY; j++)
 	  for (int i = 0; i<SZX; i++)
-	   YS_Hfil(0,i,j,0) = gb*(exp( -pow((i*dx-gmx)/gsx,2) /2.))
-			    *(exp(-pow((j*dy-gmy)/gsy,2) /2.));
+	    YS_Hfil(0,i,j,0) = gb*(exp( -pow((i*dx-gmx)/gsx,2) /2.))
+	      *(exp(-pow((j*dy-gmy)/gsy,2) /2.));
 }
 
 void xset_maxiter(int argc, char *argv[]) {
