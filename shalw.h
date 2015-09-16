@@ -1,4 +1,4 @@
-//#define GEOSTROPHY
+#define GEOSTROPHY
 
 #define RENORM
 #define USE_NETCDF
@@ -153,9 +153,33 @@ short select_io(int indic, char *nmod, int sortie, int iaxe,
 	return(1);
 }
 
+void load_allobs() {
+  //Load the state of the model as observation 
 
+if (lobs == NULL || nobs == 0) {
+    fprintf(stderr,"load_allobs : no obs loaded");
+    return;
+  }
+    
+ //First erase all obs
+ erase_lobs();
+
+ //Compute the model
+ Yset_modeltime(0);
+ before_it(1);
+ //printf("---forward(i=%d)---\n",i);
+ Yforward(-1, 0);
+ for (int i = 0 ; i < nobs ; i++) {
+   lobs[i]->val = YS_Hfil(0,lobs[i]->Y,lobs[i]->X,lobs[i]->T);
+   Yobs_insert_data("Hfil",0,lobs[i]->Y,lobs[i]->X,0,lobs[i]->T,lobs[i]->val);
+ }
+ after_it(1);
+ Yset_modeltime(0);
+
+}
 
 void compute_adjoint() {
+
   if (lobs == NULL || nobs == 0) {
     fprintf(stderr,"compute_adjoint : no obs loaded");
     return;

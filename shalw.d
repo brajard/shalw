@@ -2,17 +2,17 @@
 
 defval SZX 100
 defval SZY 100
-defval SZU 1
+defval SZU 1 
 defval SZT 300
 defval SZA 301
-//defval K_LIN
-
+defval K_LIN 
+ 
 hat_name "shalw.h" "renorm.h" 
 
 option o_gradtest
 //option o_parallel
 option o_m1qn3
-
+ 
 exec disp_option
 
 traj Toce M SZU SZT
@@ -21,7 +21,7 @@ traj Toce M SZU SZT
 space Soce M SZX SZY Toce
 
 modul Hfil  space Soce input 3 output 1 tempo cout target
-modul Ufil  space Soce input 3 output 1 tempo target
+modul Ufil  space Soce input 3 output 1 tempo
 modul Vfil  space Soce input 3 output 1 tempo
 modul Hphy  space Soce input 3 output 1 tempo
 modul Uphy  space Soce input 5 output 1 tempo
@@ -157,3 +157,4 @@ insert_fct     compute_adjoint
 insert_fct     renorm
 insert_fct     set_sol
 insert_fct arg xset_maxiter
+insert_fct     load_allobs
