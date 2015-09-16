@@ -1,8 +1,10 @@
 close all;
 clear all;
 
+osave=false;
+
 Htrue = ncread('state_true.nc','Hfil');
-H0    = ncread('state_0.nc','Hfil');
+H0    = ncread('state_4dvar.nc','Hfil');
 Ha    = ncread('state_a.nc','Hfil');
 load Y.dat
 
@@ -29,7 +31,9 @@ fclose(fid);
 Obs=Obs';
 hold on
 plot(Obs(:,1)+1,Obs(:,2)+1,'+r');
+if osave
 print -dpng 'eclairement.png';
+end
 
 figure(1)
 plot(squeeze(Htrue(Obs(1,2)+1,Obs(1,1)+1,:)),'m');
@@ -40,7 +44,9 @@ plot(Obs(1,3)+1,Y(1),'*r');
 xlabel('Time (in step time)')
 ylabel('Height (m)')
 legend('Reference','pseudo-inv','renormalization','observation');
+if osave
 print -dpng 'compare_sol.png'
+end
 
 
 cax = [-10 10]
@@ -67,7 +73,9 @@ H2 = Htrue(:,:,end);
 imagesc(H2',cax);
 title('Height at t=300 (reference)');
 
+if osave
 print -dpng 'renorm-sol.png'
+end
 
 figure(4)
 subplot(2,2,1)
@@ -91,7 +99,9 @@ subplot(2,2,4);
 H2 = Htrue(:,:,end);
 imagesc(H2',cax);
 title('Height at t=300 (reference)');
+if osave
 print -dpng 'pseudoinv-sol.png'
+end
 
 figure(5);
 cax= [-1 1];
@@ -122,7 +132,9 @@ title('error renorm (t=300)');
 
 colormap(cmap)
 colorbar
+if osave
 print -dpng 'error_H.png'
+end
 
 Utrue = ncread('state_true.nc','Ufil');
 U0    = ncread('state_0.nc','Ufil');
@@ -149,7 +161,9 @@ subplot(2,2,4);
 H2 = Utrue(:,:,end);
 imagesc(H2',cax);
 title('U at t=300 (reference)');
+if osave
 print -dpng 'pseudoinv-sol-U.png'
+end
 
 
 figure(7)
@@ -174,7 +188,9 @@ subplot(2,2,4);
 H2 = Utrue(:,:,end);
 imagesc(H2',cax);
 title('U at t=300 (reference)');
+if osave
 print -dpng 'renorm-sol-U.png'
+end
 
 if (0)
 load Y.dat

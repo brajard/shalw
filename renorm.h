@@ -92,7 +92,7 @@ void renorm() {
 
    //cout << "Xc(49:50):" << Xc(49) << "," << Xc(50) << endl;
    Y.Fill(1);
-   //Compute Y = 1.*R*X + 1 
+   //Compute Y = 1.*R*X + 0
    // (-1 because obs is one below the real value)
    MltAdd(1.0,Radj,Xc,0.0,Y) ;
    cout << "computed: " << Y << endl ;
