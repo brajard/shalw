@@ -4,7 +4,7 @@ clear all;
 osave=false;
 
 Htrue = ncread('state_true.nc','Hfil');
-H0    = ncread('state_4dvar.nc','Hfil');
+H0    = ncread('state_0.nc','Hfil');
 Ha    = ncread('state_a.nc','Hfil');
 load Y.dat
 
@@ -36,10 +36,10 @@ print -dpng 'eclairement.png';
 end
 
 figure(1)
-plot(squeeze(Htrue(Obs(1,2)+1,Obs(1,1)+1,:)),'m');
+plot(squeeze(Htrue(Obs(1,1)+1,Obs(1,2)+1,:)),'m');
 hold on
-plot(squeeze(H0(Obs(1,2)+1,Obs(1,1)+1,:)),'b');
-plot(squeeze(Ha(Obs(1,2)+1,Obs(1,1)+1,:)),'r');
+plot(squeeze(H0(Obs(1,1)+1,Obs(1,2)+1,:)),'b');
+plot(squeeze(Ha(Obs(1,1)+1,Obs(1,2)+1,:)),'r');
 plot(Obs(1,3)+1,Y(1),'*r');
 xlabel('Time (in step time)')
 ylabel('Height (m)')
