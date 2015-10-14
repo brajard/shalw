@@ -40,8 +40,8 @@ FORW1
 forward
 xdisplay
 xsavenc state_true.nc state
-goto fin
-
+#goto fin
+#goto ADJOINT
 goto RENORM
 
 goto fin
