@@ -147,6 +147,8 @@ forder
 insert_fct arg xivg
 insert_fct     xdisplay
 insert_fct arg xgauss
+insert_fct arg xporte
+insert_fct arg xcos
 insert_fct     xvitgeo
 insert_fct arg savegrad
 insert_fct arg xsavestate

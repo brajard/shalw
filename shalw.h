@@ -221,6 +221,75 @@ void xdisplay(){
 			YS_Hfil(0,i,j,100), YG_Hfil(0,i,j,100));
 }
 
+
+void xcos(int argc, char *argv[]) {
+  gb = atof(argv[1]);
+  if (argc==2) {
+    gmx = SZX*dx / 2 ;
+    gmy = SZY*dy / 2 ;
+    gsx = SZX*dx / 20 ;
+    gsy = SZY*dy / 20 ;
+  }
+  else
+    if (argc==4) {
+      gmx = SZX*dx / 2 ;
+      gmy = SZY*dy / 2 ;
+      gsx = atof(argv[2]);
+      gsy = atof(argv[3]);
+    }
+    else
+      {
+	
+	gmx = atof(argv[2]); gsx = atof(argv[3]);
+	gmy = atof(argv[4]); gsy = atof(argv[5]);
+      }
+
+  int i0,j0,di,dj;
+  i0 = gmx/dx;
+  j0 = gmy/dy;
+  di = gsx/dx;
+  dj = gsy/dy;
+  for (int j = j0-dj ; j<= j0+dj ; j++)
+    for (int i = i0-di ; i<=i0+di ; i++)
+	    YS_Hfil(0,i,j,0) = 0.25*gb*
+	      (cos(M_PI*(i*dx-gmx)/gsx)+1)*
+	      (cos(M_PI*(j*dx-gmy)/gsy)+1);
+	
+}
+
+void xporte(int argc, char *argv[]) {
+  gb = atof(argv[1]);
+  if (argc==2) {
+    gmx = SZX*dx / 2 ;
+    gmy = SZY*dy / 2 ;
+    gsx = SZX*dx / 20 ;
+    gsy = SZY*dy / 20 ;
+  }
+  else
+    if (argc==4) {
+      gmx = SZX*dx / 2 ;
+      gmy = SZY*dy / 2 ;
+      gsx = atof(argv[2]);
+      gsy = atof(argv[3]);
+    }
+    else
+      {
+	
+	gmx = atof(argv[2]); gsx = atof(argv[3]);
+	gmy = atof(argv[4]); gsy = atof(argv[5]);
+      }
+
+  int i0,j0,di,dj;
+  i0 = gmx/dx;
+  j0 = gmy/dy;
+  di = gsx/dx;
+  dj = gsy/dy;
+  for (int j = j0-dj ; j<= j0+dj ; j++)
+    for (int i = i0-di ; i<=i0+di ; i++)
+      YS_Hfil(0,i,j,0)=gb;
+	
+}
+
 void xgauss(int argc, char *argv[]){
 
 	gb = atof(argv[1]);
