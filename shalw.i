@@ -27,6 +27,8 @@ TEST_DF
 
 INIT
 xgauss 15 15000 15000
+#xporte 15 15000 15000
+#xcos 15 8000 8000
 xdisplay
 set_modeltime 0
 read_lobs obs.dat
