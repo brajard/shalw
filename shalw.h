@@ -87,7 +87,7 @@ extern int Yobs_insert_data (char *nmmod, int sortie, int iaxe, int jaxe, int ka
 			     int pdt, YREAL val);
 extern void       Yrazgrad_all();
 
-double dx,dy,dedt,svdedt,pcor,grav,dissip,hmoy,alpha,gb,gmx,gsx,gmy,gsy;
+double dx,dy,dedt,svdedt,pcor,grav,dissip,hmoy,alpha,gb,gmx,gsx,gmy,gsy,rho0;
 void savestate();
 void erase_lobs();
 void clear_Yst_nodo(struct Yst_nodo *n_obs, int lev, int max);
@@ -345,6 +345,23 @@ void xporte(int argc, char *argv[]) {
 	
 }
 
+void xwind (int argc, char *argv[]){
+  YREAL tau0 =  atof(argv[1]);
+  	if (argc==2) {
+	  gmx = SZX*dx / 2 ;
+	  gmy = SZY*dy / 2 ;
+	}
+	YREAL Lx = SZX*dx;
+	YREAL Ly = SZY*dy;
+	
+	for (int j = 0; j<SZY; j++)
+	  for (int i = 0; i<SZX; i++) {
+	    YS1_Taux(i,j) = tau0 * cos (2*M_PI*(j*dy)/Ly) ;
+	    YS1_Tauy(i,j) = 0 ;
+	  }
+	
+}
+
 void xgauss(int argc, char *argv[]){
 
 	gb = atof(argv[1]);
@@ -441,6 +458,7 @@ void xivg(int argc,char *argv[]){
 	else if  (strcmp(argv[1], "dissip") == 0) dissip=val;
 	else if  (strcmp(argv[1], "hmoy") == 0) hmoy=val;
 	else if  (strcmp(argv[1], "alpha") == 0) alpha=val;
+	else if  (strcmp(argv[1], "rho0") == 0) rho0=val;
 }
 
 void savestate() {

@@ -16,16 +16,18 @@ option o_m1qn3
 exec disp_option
 
 traj Toce M SZU SZT
+traj Tcst M 0 1
 //traj Toce2 M SZU 0 2 SZT
 
 space Soce M SZX SZY Toce
+space Soce_cst M SZX SZY Tcst
 
 modul Hfil  space Soce input 3 output 1 tempo cout target
 modul Ufil  space Soce input 3 output 1 tempo
 modul Vfil  space Soce input 3 output 1 tempo
 modul Hphy  space Soce input 3 output 1 tempo
-modul Uphy  space Soce input 5 output 1 tempo
-modul Vphy  space Soce input 5 output 1 tempo
+modul Uphy  space Soce input 6 output 1 tempo
+modul Vphy  space Soce input 6 output 1 tempo
 modul Hz    space Soce input 4 output 1 tempo
 modul Vit   space Soce input 5 output 1 tempo
 modul Vor   space Soce input 4 output 1 tempo
@@ -35,7 +37,19 @@ modul Gradx space Soce input 2 output 1 tempo
 modul Grady space Soce clonof Gradx
 modul Mcu   space Soce input 5 output 1 tempo
 modul Mcv   space Soce clonof Mcu
+modul Tau_forx space Soce input 3 output 1 tempo
+modul Tau_fory space Soce clonof Tau_forx
+modul Taux  space Soce_cst noward output 1
+modul Tauy  space Soce_cst clonof Taux
 
+
+ctin Tau_forx 1 from Taux 1 i   j
+ctin Tau_forx 1 from Hphy 1 i   j t-1
+ctin Tau_forx 1 from Hphy 1 i+1 j t-1
+
+ctin Tau_fory 1 from Tauy 1 i   j
+ctin Tau_fory 1 from Hphy 1 i   j-1 t-1
+ctin Tau_fory 1 from Hphy 1 i   j   t-1
 
 ctin Lamu 1 from Vor  1 i-1 j   t-1
 ctin Lamu 2 from Vor  1 i   j t-1
@@ -83,12 +97,16 @@ ctin Uphy 2 from Lamv  1 i   j   t
 ctin Uphy 3 from Gradx 1 i   j   t
 ctin Uphy 4 from Hz   1 i   j+1 t
 ctin Uphy 5 from Hz   1 i   j   t
+ctin Uphy 6 from Tau_forx 1 i j t
+
 
 ctin Vphy 1 from Vfil  1 i   j   t-1
 ctin Vphy 2 from Lamu  1 i   j   t
 ctin Vphy 3 from Grady 1 i   j   t
 ctin Vphy 4 from Hz    1 i   j   t
 ctin Vphy 5 from Hz    1 i-1 j   t
+ctin Vphy 6 from Tau_fory 1 i j t
+
 
 ctin Hfil 1 from Hfil 1 i   j   t-1
 ctin Hfil 2 from Hphy 1 i   j   t-1
@@ -122,6 +140,8 @@ order modinspace Soce
 	Hz 
    forder
    order YA1 YA2
+   	Tau_forx
+	Tau_fory
    	Lamu
 	Lamv
 	Gradx
@@ -147,6 +167,7 @@ forder
 insert_fct arg xivg
 insert_fct     xdisplay
 insert_fct arg xgauss
+insert_fct arg xwind
 insert_fct arg xporte
 insert_fct arg xcos
 insert_fct     xvitgeo

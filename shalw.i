@@ -4,19 +4,22 @@ straj
 #xivg dx 5000
 #xivg dy 5000
 
-xivg dt 800
-xivg dx 2000
-xivg dy 2000
+xivg dt 1800
+xivg dx 2500
+xivg dy 2500
 
 #xivg dt 1000
 #xivg dx 4000
 #xivg dy 4000
-xivg pcor 0.0001
-xivg grav 0.01
-xivg dissip 0.00001
+xivg pcor 7e-5
+xivg grav 0.02
+xivg dissip 5e-7
 #xivg dissip 0
 xivg alpha 0.15
-xivg hmoy 100 
+xivg hmoy 500
+
+#for forcing
+xivg rho0 1000
 
 goto INIT
 
@@ -27,6 +30,7 @@ TEST_DF
 
 INIT
 xgauss 15 15000 15000
+xwind 0.015
 #xporte 15 15000 15000
 #xcos 15 8000 8000
 xdisplay
@@ -42,7 +46,7 @@ FORW1
 forward
 xdisplay
 xsavenc state_true.nc state
-#goto fin
+goto fin
 #goto ADJOINT
 goto RENORM
 
