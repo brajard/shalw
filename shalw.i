@@ -18,8 +18,11 @@ xivg dissip 5e-7
 xivg alpha 0.15
 xivg hmoy 500
 
-#for forcing
+#for wind forcing
 xivg rho0 1000
+
+#for diffusion
+xivg nu 9
 
 goto INIT
 

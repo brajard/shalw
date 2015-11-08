@@ -87,7 +87,7 @@ extern int Yobs_insert_data (char *nmmod, int sortie, int iaxe, int jaxe, int ka
 			     int pdt, YREAL val);
 extern void       Yrazgrad_all();
 
-double dx,dy,dedt,svdedt,pcor,grav,dissip,hmoy,alpha,gb,gmx,gsx,gmy,gsy,rho0;
+double dx,dy,dedt,svdedt,pcor,grav,dissip,hmoy,alpha,gb,gmx,gsx,gmy,gsy,rho0, nu;
 void savestate();
 void erase_lobs();
 void clear_Yst_nodo(struct Yst_nodo *n_obs, int lev, int max);
@@ -459,6 +459,7 @@ void xivg(int argc,char *argv[]){
 	else if  (strcmp(argv[1], "hmoy") == 0) hmoy=val;
 	else if  (strcmp(argv[1], "alpha") == 0) alpha=val;
 	else if  (strcmp(argv[1], "rho0") == 0) rho0=val;
+	else if  (strcmp(argv[1], "nu") == 0) nu=val;
 }
 
 void savestate() {

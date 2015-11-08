@@ -26,8 +26,8 @@ modul Hfil  space Soce input 3 output 1 tempo cout target
 modul Ufil  space Soce input 3 output 1 tempo
 modul Vfil  space Soce input 3 output 1 tempo
 modul Hphy  space Soce input 3 output 1 tempo
-modul Uphy  space Soce input 6 output 1 tempo
-modul Vphy  space Soce input 6 output 1 tempo
+modul Uphy  space Soce input 7 output 1 tempo
+modul Vphy  space Soce input 7 output 1 tempo
 modul Hz    space Soce input 4 output 1 tempo
 modul Vit   space Soce input 5 output 1 tempo
 modul Vor   space Soce input 4 output 1 tempo
@@ -41,6 +41,20 @@ modul Tau_forx space Soce input 3 output 1 tempo
 modul Tau_fory space Soce clonof Tau_forx
 modul Taux  space Soce_cst noward output 1
 modul Tauy  space Soce_cst noward output 1
+modul Difu  space Soce  input 5 output 1
+modul Difv  space Soce  clonof Difu
+
+ctin Difu 1 from Uphy 1 i+1 j   t-1
+ctin Difu 2 from Uphy 1 i-1 j   t-1
+ctin Difu 3 from Uphy 1 i   j   t-1
+ctin Difu 4 from Uphy 1 i   j+1 t-1
+ctin Difu 5 from Uphy 1 i   j-1 t-1
+
+ctin Difv 1 from Vphy 1 i+1 j   t-1
+ctin Difv 2 from Vphy 1 i-1 j   t-1
+ctin Difv 3 from Vphy 1 i   j   t-1
+ctin Difv 4 from Vphy 1 i   j+1 t-1
+ctin Difv 5 from Vphy 1 i   j-1 t-1
 
 
 ctin Tau_forx 1 from Taux 1 i   j
@@ -98,7 +112,7 @@ ctin Uphy 3 from Gradx 1 i   j   t
 ctin Uphy 4 from Hz   1 i   j+1 t
 ctin Uphy 5 from Hz   1 i   j   t
 ctin Uphy 6 from Tau_forx 1 i j t
-
+ctin Uphy 7 from Difu 1 i j t
 
 ctin Vphy 1 from Vfil  1 i   j   t-1
 ctin Vphy 2 from Lamu  1 i   j   t
@@ -106,7 +120,7 @@ ctin Vphy 3 from Grady 1 i   j   t
 ctin Vphy 4 from Hz    1 i   j   t
 ctin Vphy 5 from Hz    1 i-1 j   t
 ctin Vphy 6 from Tau_fory 1 i j t
-
+ctin Vphy 7 from Difv 1  i   j   t
 
 ctin Hfil 1 from Hfil 1 i   j   t-1
 ctin Hfil 2 from Hphy 1 i   j   t-1
@@ -142,6 +156,8 @@ order modinspace Soce
    order YA1 YA2
    	Tau_forx
 	Tau_fory
+	Difu
+	Difv
    	Lamu
 	Lamv
 	Gradx
