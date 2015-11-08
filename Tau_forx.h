@@ -5,9 +5,12 @@ forward(YREAL taux, YREAL hm, YREAL hp)
   #else
   YS1 = taux / (rho0 * (hmoy + 0.5*(hm+hp)));
   #endif
+  // if (Yi==50 && Yj==50)
+  //  printf("tau_forx(%d,%d,%d)=%g(%f,%f,%f)\n",Yi,Yj,YTemps,YS1,hmoy,rho0,taux);
+
 }
 
-backward(YREAL tauxy, YREAL hm, YREAL hp) 
+backward(YREAL taux, YREAL hm, YREAL hp) 
 {
   #ifndef K_LIN
   YREAL denom = rho0 * (hmoy + 0.5*(hm+hp));

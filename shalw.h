@@ -1,4 +1,4 @@
-#define GEOSTROPHY
+//#define GEOSTROPHY
 
 #define RENORM
 #define USE_NETCDF
@@ -356,7 +356,7 @@ void xwind (int argc, char *argv[]){
 	
 	for (int j = 0; j<SZY; j++)
 	  for (int i = 0; i<SZX; i++) {
-	    YS1_Taux(i,j) = tau0 * cos (2*M_PI*(j*dy)/Ly) ;
+	    YS1_Taux(i,j) = tau0 * cos (2*M_PI*((j*dy)-gmy)/Ly) ;
 	    YS1_Tauy(i,j) = 0 ;
 	  }
 	

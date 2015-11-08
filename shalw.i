@@ -29,7 +29,7 @@ TEST_DF
 #testdf 50 10 1 10 1 %0.000001 0.0001
 
 INIT
-xgauss 15 15000 15000
+xgauss 0 15000 15000
 xwind 0.015
 #xporte 15 15000 15000
 #xcos 15 8000 8000

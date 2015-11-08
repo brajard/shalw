@@ -5,7 +5,7 @@ defval SZY 100
 defval SZU 1 
 defval SZT 300
 defval SZA 301
-defval K_LIN 
+//defval K_LIN 
  
 hat_name "shalw.h" "renorm.h" 
 
@@ -40,16 +40,16 @@ modul Mcv   space Soce clonof Mcu
 modul Tau_forx space Soce input 3 output 1 tempo
 modul Tau_fory space Soce clonof Tau_forx
 modul Taux  space Soce_cst noward output 1
-modul Tauy  space Soce_cst clonof Taux
+modul Tauy  space Soce_cst noward output 1
 
 
 ctin Tau_forx 1 from Taux 1 i   j
-ctin Tau_forx 1 from Hphy 1 i   j t-1
-ctin Tau_forx 1 from Hphy 1 i+1 j t-1
+ctin Tau_forx 2 from Hphy 1 i   j t-1
+ctin Tau_forx 3 from Hphy 1 i+1 j t-1
 
 ctin Tau_fory 1 from Tauy 1 i   j
-ctin Tau_fory 1 from Hphy 1 i   j-1 t-1
-ctin Tau_fory 1 from Hphy 1 i   j   t-1
+ctin Tau_fory 2 from Hphy 1 i   j-1 t-1
+ctin Tau_fory 3 from Hphy 1 i   j   t-1
 
 ctin Lamu 1 from Vor  1 i-1 j   t-1
 ctin Lamu 2 from Vor  1 i   j t-1
