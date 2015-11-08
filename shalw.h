@@ -185,16 +185,16 @@ void convol_obs(int iobs, int sz) {
   int xx[2*sz+1];
   int yy[2*sz+1];
   YREAL dval[2*sz+1][2*sz+1];
-  
+  YREAL cnorm=0;
   int i,j;
   for (i=0;i<2*sz+1;i++)
     {
       yy[i]=(lobs[iobs]->Y)-sz+i;
-      printf("yy[%d]=%d\n",i,yy[i]);
+      // printf("yy[%d]=%d\n",i,yy[i]);
     }
       for (j=0;j<2*sz+1;j++){
 	xx[j]=(lobs[iobs]->X)-sz+j;
-	printf("xx[%d]=%d\n",j,xx[j]);
+	//printf("xx[%d]=%d\n",j,xx[j]);
       }
       for (i=0;i<2*sz+1;i++){
 	for (j=0;j<2*sz+1;j++)
@@ -202,10 +202,31 @@ void convol_obs(int iobs, int sz) {
 	    dval[i][j]= 
 	      (cos(M_PI*(xx[j]-lobs[iobs]->X)/sz)+1)*
 	      (cos(M_PI*(yy[i]-lobs[iobs]->Y)/sz)+1);
-	    printf("%3.3g ",dval[i][j]);
+	    cnorm+=dval[i][j];
+	    //    printf("%3.3g ",dval[i][j]);
 	  }
-	printf("\n");
+	//	printf("\n");
       }
+ for (i=0;i<2*sz+1;i++){
+	for (j=0;j<2*sz+1;j++)
+	  {
+	    dval[i][j]= dval[i][j]/cnorm;
+	    //    printf("%3.3g ",dval[i][j]);
+	  }
+	//	printf("\n");
+      }
+
+ //Set observations
+ YREAL mu=0;
+ for (i=0;i<2*sz+1;i++)
+   for (j=0;j<2*sz+1;j++)
+     {
+       mu += YS_Hfil(0,yy[i],xx[j],lobs[iobs]->T)*dval[i][j];
+       Yobs_insert_data("Hfil",0,yy[i],xx[j],0,lobs[iobs]->T,YS_Hfil(0,yy[i],xx[j],lobs[iobs]->T));
+       YS_Hfil(0,yy[i],xx[j],lobs[iobs]->T)+=dval[i][j];
+     }
+	lobs[iobs]->val = mu;                                        ;
+
 }
       
 void compute_adjoint() {
@@ -230,9 +251,9 @@ void compute_adjoint() {
     //Trick to compute adjoint (should also work for non-linear models)
     convol_obs(i,4);
 
-    lobs[i]->val = YS_Hfil(0,lobs[i]->Y,lobs[i]->X,lobs[i]->T);
-    YS_Hfil(0,lobs[i]->Y,lobs[i]->X,lobs[i]->T)++;
-    Yobs_insert_data("Hfil",0,lobs[i]->Y,lobs[i]->X,0,lobs[i]->T,lobs[i]->val);
+    //lobs[i]->val = YS_Hfil(0,lobs[i]->Y,lobs[i]->X,lobs[i]->T);
+    //YS_Hfil(0,lobs[i]->Y,lobs[i]->X,lobs[i]->T)++;
+    //Yobs_insert_data("Hfil",0,lobs[i]->Y,lobs[i]->X,0,lobs[i]->T,lobs[i]->val);
 
 
 
