@@ -5,8 +5,8 @@ straj
 #xivg dy 5000
 
 xivg dt 1800
-xivg dx 2500
-xivg dy 2500
+xivg dx 25000
+xivg dy 25000
 
 #xivg dt 1000
 #xivg dx 4000
@@ -15,6 +15,7 @@ xivg pcor 7e-5
 xivg grav 0.02
 xivg dissip 5e-7
 #xivg dissip 0
+#xivg alpha 0.15
 xivg alpha 0.15
 xivg hmoy 500
 

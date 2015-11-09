@@ -1,4 +1,4 @@
-forward(YREAL vfil, YREAL lamu, YREAL grady, YREAL hzp, YREAL hzm, YREAL tau_fory)
+forward(YREAL vfil, YREAL lamu, YREAL grady, YREAL hzp, YREAL hzm, YREAL tau_fory, YREAL difv)
 {
   if (Yt == 1) {
 #ifdef GEOSTROPHY
@@ -10,17 +10,17 @@ forward(YREAL vfil, YREAL lamu, YREAL grady, YREAL hzp, YREAL hzm, YREAL tau_for
   }
   else {
     YREAL coef = 1 ;
-    if(Yj == 0)
+    if(Yj == 0 )
       YS1 = 0;
     else {
       if (Yi ==0)
 	coef = 2 ; //to compensate the vorticity equal to zero
-      YS1 = vfil + dedt*(-coef*lamu - grady/dy  -dissip*vfil + tau_fory);
+      YS1 = vfil + dedt*(-coef*lamu - grady/dy  -dissip*vfil + tau_fory + difv);
     }
   }
 }
 
-backward(YREAL vfil, YREAL lamu, YREAL grady, YREAL hzp, YREAL hzm, YREAL tau_fory)
+backward(YREAL vfil, YREAL lamu, YREAL grady, YREAL hzp, YREAL hzm, YREAL tau_fory, YREAL difv)
 {
  if (Yt == 1) {
 #ifdef GEOSTROPHY
@@ -40,6 +40,7 @@ backward(YREAL vfil, YREAL lamu, YREAL grady, YREAL hzp, YREAL hzm, YREAL tau_fo
        YJ1I2 = -coef*dedt ;
        YJ1I3 = -dedt/dy ;
        YJ1I6 = dedt ;
+       YJ1I7 = dedt ;
      }  
  }
 }

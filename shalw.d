@@ -1,10 +1,10 @@
 //#define LIN
 
-defval SZX 100
-defval SZY 100
+defval SZX 80
+defval SZY 80
 defval SZU 1 
-defval SZT 300
-defval SZA 301
+defval SZT 1500
+defval SZA 1501
 //defval K_LIN 
  
 hat_name "shalw.h" "renorm.h" 
@@ -12,6 +12,7 @@ hat_name "shalw.h" "renorm.h"
 option o_gradtest
 //option o_parallel
 option o_m1qn3
+//option o_dbg_nanf
  
 exec disp_option
 
@@ -41,7 +42,7 @@ modul Tau_forx space Soce input 3 output 1 tempo
 modul Tau_fory space Soce clonof Tau_forx
 modul Taux  space Soce_cst noward output 1
 modul Tauy  space Soce_cst noward output 1
-modul Difu  space Soce  input 5 output 1
+modul Difu  space Soce  input 5 output 1 tempo
 modul Difv  space Soce  clonof Difu
 
 ctin Difu 1 from Uphy 1 i+1 j   t-1

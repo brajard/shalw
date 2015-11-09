@@ -350,13 +350,18 @@ void xwind (int argc, char *argv[]){
   	if (argc==2) {
 	  gmx = SZX*dx / 2 ;
 	  gmy = SZY*dy / 2 ;
+	  gsx = SZX*dx / 20 ;
+	  gsy = SZY*dy / 20 ;
 	}
 	YREAL Lx = SZX*dx;
 	YREAL Ly = SZY*dy;
 	
 	for (int j = 0; j<SZY; j++)
 	  for (int i = 0; i<SZX; i++) {
-	    YS1_Taux(i,j) = tau0 * cos (2*M_PI*((j*dy)-gmy)/Ly) ;
+	    YS1_Taux(i,j) = tau0 * 
+	      //exp( -pow((i*dx-gmx)/gsx,2) /2.) *
+	      //exp(-pow((j*dy-gmy)/gsy,2) /2.) *
+	       cos (2*M_PI*((j*dy)-gmy)/Ly) ;
 	    YS1_Tauy(i,j) = 0 ;
 	  }
 	
