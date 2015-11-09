@@ -21,7 +21,7 @@ backward(YREAL up, YREAL um, YREAL hc, YREAL hp, YREAL hm)
   dydum = -0.5*(hm+hc);
   dydhc = 0.5*(up-um);
   dydhp = 0.5*up;
-  dydhm = -0.5*up;
+  dydhm = -0.5*um;
 #endif
   YJ1I1 = dylindup + dydup ;
   YJ1I2 = dylindum + dydum ;

@@ -198,3 +198,4 @@ insert_fct     renorm
 insert_fct     set_sol
 insert_fct arg xset_maxiter
 insert_fct     load_allobs
+insert_fct     saveinit

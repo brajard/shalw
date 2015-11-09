@@ -8,8 +8,8 @@ forward(YREAL uip,YREAL uim, YREAL u, YREAL ujp, YREAL ujm)
 
 backward(YREAL uip,YREAL uim, YREAL u, YREAL ujp, YREAL ujm)  
 {
-  YREAL idx2=nu/dx*dx;
-  YREAL idy2=nu/dy*dy;
+  YREAL idx2=nu/(dx*dx);
+  YREAL idy2=nu/(dy*dy);
 
   YJ1I1 = idx2 ;
   YJ1I2 = idx2 ;

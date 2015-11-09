@@ -24,12 +24,12 @@ xivg rho0 1000
 
 #for diffusion
 xivg nu 9
-
+goto TEST_DF
 goto INIT
 
 TEST_DF
-#testdf 10 10 1 4 r %0.000001 0.0001
-#goto fin
+testdf 10 10 1 4 r %0.000001 0.0001
+goto fin
 #testdf 50 10 1 10 1 %0.000001 0.0001
 
 INIT
@@ -41,19 +41,44 @@ xdisplay
 set_modeltime 0
 read_lobs obs.dat
 
-goto FORW1
+#goto SPINUP
+#goto FORW1
 
-goto TEST_OF
+#goto TEST_OF
 
 FORW1
 
 forward
 xdisplay
 xsavenc state_true.nc state
-goto fin
+goto gin
 #goto ADJOINT
 goto RENORM
 
+goto fin
+
+SPINUP
+forward
+xdisplay
+saveinit
+set_modeltime 0
+forward
+saveinit
+set_modeltime 0
+forward
+saveinit
+set_modeltime 0
+forward
+saveinit
+set_modeltime 0
+forward
+saveinit
+set_modeltime 0
+forward
+saveinit
+set_modeltime 0
+forward
+xsavenc state_true.nc state
 goto fin
 
 ADJOINT
@@ -122,8 +147,8 @@ TEST_OF
 read_lobs obs.dat
 load_allobs
 xgauss 0 15000 15000
-goto M1QN3
-#testof 1 1 10 15 
+#goto M1QN3
+testof 1 1 10 15 
 
 goto fin
 

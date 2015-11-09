@@ -483,6 +483,18 @@ void savestate() {
 
 }
 
+void saveinit() {
+  //Save state at the end of the trajectory in the init
+  int ix,iy;
+    for (iy=0;iy<YA1_Soce;iy++)
+      for (ix=0;ix<YA2_Soce;ix++) {
+	YS_Hfil(0,iy,ix,0) = YS_Hfil(0,iy,ix,YNBALLTIME_Toce-1);
+	YS_Ufil(0,iy,ix,0) = YS_Ufil(0,iy,ix,YNBALLTIME_Toce-1);
+	YS_Vfil(0,iy,ix,0) = YS_Vfil(0,iy,ix,YNBALLTIME_Toce-1);
+
+      }
+}
+
 void xsavestate(int argc,char *argv[]){
   if (argc!=2) {
     printf("xsavestate: incorrect number of args\n");
