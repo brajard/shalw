@@ -98,7 +98,7 @@ int savegradnc();
 void xsavenc(int argc, char *argv[]);
 int savenc(char filename[],char Names[NVARS][STRLEN],
 	   char Units[NVARS][STRLEN], char Long_Names[NVARS][STRLEN],
-	    YREAL data[NVARS][YNBALLTIME_Toce][SZY][SZX]);
+	   YREAL data[NVARS][YNBALLTIME_Toce][SZY][SZX], int it);
 
 #endif
 
@@ -740,29 +740,42 @@ int ncinit() {
 }
 
 void xsavenc(int argc, char *argv[]) {
-  if (argc !=3) {
+  int it=-1;
+  if (argc !=3 && argc!=4) {
     fprintf(stderr,"xsavegradnc : wrong number of arguments");
     return;
   }
+  if (argc == 4)
+    it = atoi(argv[3]);
   if (!strcmp(argv[2],"grad") )
-    savenc(argv[1],Names,Units,Long_Names,grads);
-  
+    savenc(argv[1],Names,Units,Long_Names,grads,it);  
   else {
     savestate();
-    savenc(argv[1],SNames,SUnits,SLong_Names,state);
+    savenc(argv[1],SNames,SUnits,SLong_Names,state,it);
   }
 }
 
 int savenc(char filename[],char Names[NVARS][STRLEN],
 	   char Units[NVARS][STRLEN], char Long_Names[NVARS][STRLEN], 
-	   YREAL data[NVARS][YNBALLTIME_Toce][SZY][SZX]) {
+	   YREAL data[NVARS][YNBALLTIME_Toce][SZY][SZX], int it0) {
   
   int ivar,retval;
   int it,ik;
+  int itbeg,itn;
+	   
   int ncid;
   int dimids[NDIMS];
   int varids[NVARS];
   size_t start[NDIMS], count[NDIMS];
+  /* parametrize the time step */
+  if (it0==-1) {//alltimestep
+    itbeg = 0;
+    itn = YNBALLTIME_Toce;
+  }
+  else {
+    itbeg = it0;
+    itn = 1;
+  }
   /* Create the file */
   if ((retval = nc_create(filename, NC_CLOBBER, &ncid)))
     ERRNC(retval);
@@ -804,11 +817,12 @@ int savenc(char filename[],char Names[NVARS][STRLEN],
    start[1]=0;
    start[2]=0;
    
-   for (it=0;it<YNBALLTIME_Toce;it++)
+   //   for (it=0;it<YNBALLTIME_Toce;it++)
+   for (it=itbeg ; it < itbeg+itn ; it++)
      //  for (iy=0;iy<YA1_Soce;iy++)
      // for (ix=0;ix<YA2_Soce;ix++)
 	 {
-	   start [0]=it;
+	   start [0]=it-itbeg;
 	   for (ik=0;ik<6;ik++) 
 	     if ((retval = nc_put_vara_double(ncid, varids[ik], start, count, 
 					      &data[ik][it][0][0])))
