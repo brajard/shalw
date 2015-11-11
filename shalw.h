@@ -82,7 +82,8 @@ const int TotS = SZY *SZX ;
 #endif //ifdef RENORM
 
 
-//Declaration 
+//Declaration
+double randn (double mu, double sigma);
 extern int Yobs_insert_data (char *nmmod, int sortie, int iaxe, int jaxe, int kaxe,
 			     int pdt, YREAL val);
 extern void       Yrazgrad_all();
@@ -756,6 +757,14 @@ void xsavenc(int argc, char *argv[]) {
   }
 }
 
+void xperturb(int argc, char *argv[]) {
+  int it = atoi(argv[2]);
+  YREAL dx = atof(argv[3]);
+  for (iy=0;iy<YA1_Soce;iy++)
+    for (ix=0;ix<YA2_Soce;ix++) 
+      YS_Hfil(0,iy,ix,it) += randn(0,dx);
+}
+
 void xload_init(int argc, char *argv[]) {
   YREAL data[SZY][SZX];
   int ix,iy;
@@ -886,3 +895,36 @@ int readnc (char filename[],char Name[STRLEN],YREAL data[SZY][SZX], int it0) {
    return(0);
 }
 #endif
+
+
+#include <math.h>
+#include <stdlib.h>
+ 
+double randn (double mu, double sigma)
+{
+  double U1, U2, W, mult;
+  static double X1, X2;
+  static int call = 0;
+ 
+  if (call == 1)
+    {
+      call = !call;
+      return (mu + sigma * (double) X2);
+    }
+ 
+  do
+    {
+      U1 = -1 + ((double) rand () / RAND_MAX) * 2;
+      U2 = -1 + ((double) rand () / RAND_MAX) * 2;
+      W = pow (U1, 2) + pow (U2, 2);
+    }
+  while (W >= 1 || W == 0);
+ 
+  mult = sqrt ((-2 * log (W)) / W);
+  X1 = U1 * mult;
+  X2 = U2 * mult;
+ 
+  call = !call;
+ 
+  return (mu + sigma * (double) X1);
+}
