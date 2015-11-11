@@ -12,11 +12,12 @@ xivg dy 25000
 #xivg dx 4000
 #xivg dy 4000
 xivg pcor 7e-5
+#xivg pcor 2e-5
 xivg grav 0.02
 xivg dissip 5e-7
 #xivg dissip 0
+xivg alpha 0.025
 #xivg alpha 0.15
-xivg alpha 0.15
 xivg hmoy 500
 
 #for wind forcing
@@ -34,25 +35,27 @@ goto fin
 
 INIT
 xgauss 0 15000 15000
+#xwind 0.015
 xwind 0.015
 #xporte 15 15000 15000
 #xcos 15 8000 8000
 xdisplay
 set_modeltime 0
 read_lobs obs.dat
+xload_init snapshot.nc
 
-#goto SPINUP
+goto SPINUP
 #goto FORW1
 
-goto EXP_JUM
-#goto TEST_OF
+#goto EXP_JUM
+goto TEST_OF
 
 FORW1
 
 forward
 xdisplay
 xsavenc state_true.nc state
-goto gin
+goto fin
 #goto ADJOINT
 goto RENORM
 
@@ -60,7 +63,21 @@ goto fin
 
 SPINUP
 forward
+xsavenc state_tmp.nc state
+
 xdisplay
+saveinit
+set_modeltime 0
+forward
+saveinit
+set_modeltime 0
+forward
+saveinit
+set_modeltime 0
+forward
+saveinit
+set_modeltime 0
+forward
 saveinit
 set_modeltime 0
 forward
@@ -144,12 +161,14 @@ goto TEST_OF
 goto fin
 
 TEST_OF
+
 read_lobs obs.dat
 load_allobs
 #xgauss 0 15000 15000
 saveinit
+
 #goto M1QN3
-testof 1 1 10 15 
+testof 1 1 10 15 0
 
 goto fin
 

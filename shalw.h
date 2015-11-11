@@ -95,6 +95,7 @@ void clear_Yst_nodo(struct Yst_nodo *n_obs, int lev, int max);
 #ifdef USE_NETCDF
 int ncinit();
 int savegradnc();
+int readnc (char filename[],char Name[STRLEN],YREAL data[SZY][SZX], int it0);
 void xsavenc(int argc, char *argv[]);
 int savenc(char filename[],char Names[NVARS][STRLEN],
 	   char Units[NVARS][STRLEN], char Long_Names[NVARS][STRLEN],
@@ -755,6 +756,24 @@ void xsavenc(int argc, char *argv[]) {
   }
 }
 
+void xload_init(int argc, char *argv[]) {
+  YREAL data[SZY][SZX];
+  int ix,iy;
+  readnc(argv[1],"Hfil",data,0);
+  for (iy=0;iy<YA1_Soce;iy++)
+    for (ix=0;ix<YA2_Soce;ix++) 
+      YS_Hfil(0,iy,ix,0) = data[iy][ix];
+  readnc(argv[1],"Ufil",data,0);
+  for (iy=0;iy<YA1_Soce;iy++)
+    for (ix=0;ix<YA2_Soce;ix++) 
+      YS_Ufil(0,iy,ix,0) = data[iy][ix];
+  readnc(argv[1],"Vfil",data,0);
+  for (iy=0;iy<YA1_Soce;iy++)
+    for (ix=0;ix<YA2_Soce;ix++) 
+      YS_Vfil(0,iy,ix,0) = data[iy][ix];
+  
+}
+
 int savenc(char filename[],char Names[NVARS][STRLEN],
 	   char Units[NVARS][STRLEN], char Long_Names[NVARS][STRLEN], 
 	   YREAL data[NVARS][YNBALLTIME_Toce][SZY][SZX], int it0) {
@@ -836,4 +855,34 @@ int savenc(char filename[],char Names[NVARS][STRLEN],
    
 }
 
+int readnc (char filename[],char Name[STRLEN],YREAL data[SZY][SZX], int it0) {
+  int retval,ncid, data_id;
+  size_t start[NDIMS], count[NDIMS];
+  int it;
+  
+  //Open file
+   if ((retval = nc_open(filename, NC_NOWRITE, &ncid)))
+      ERRNC(retval);
+
+   //Get varids
+    if ((retval = nc_inq_varid(ncid, Name, &data_id)))
+      ERR(retval);
+    count[0]=1;
+   count[1]=SZY;
+   count[2]=SZX;
+   start[0]=0;
+   start[1]=0;
+   start[2]=0;
+   //  for (it=0;it<=it0;it++) {
+     start[0]=it0;
+     if ((retval = nc_get_vara_double(ncid, data_id, start, 
+				     count, &data[0][0])))
+       	 ERR(retval);
+     // }
+   
+   
+   if ((retval = nc_close(ncid)))
+     ERR(retval);
+   return(0);
+}
 #endif

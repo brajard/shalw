@@ -192,6 +192,7 @@ insert_fct arg savegrad
 insert_fct arg xsavestate
 insert_fct arg xobs
 insert_fct arg xsavenc
+insert_fct arg xload_init
 insert_fct arg read_lobs
 insert_fct     compute_adjoint
 insert_fct     renorm
