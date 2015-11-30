@@ -3,8 +3,8 @@
 defval SZX 80
 defval SZY 80
 defval SZU 1 
-defval SZT 1500
-defval SZA 1501
+defval SZT 300
+defval SZA 301
 //defval K_LIN 
  
 hat_name "shalw.h" "renorm.h" 
@@ -200,3 +200,4 @@ insert_fct     set_sol
 insert_fct arg xset_maxiter
 insert_fct     load_allobs
 insert_fct     saveinit
+insert_fct arg xperturb

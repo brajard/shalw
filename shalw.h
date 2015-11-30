@@ -275,7 +275,7 @@ void xdisplay(){
 	i=(int)(SZX/2);
 	j=(int)(SZY/2);
 	printf("point:%i,%i, Hfil=% -23.15e @J/@Hfil=% -23.15e\n", i,j,
-			YS_Hfil(0,i,j,100), YG_Hfil(0,i,j,100));
+			YS_Hfil(0,i,j,300), YG_Hfil(0,i,j,0));
 }
 
 
@@ -758,11 +758,13 @@ void xsavenc(int argc, char *argv[]) {
 }
 
 void xperturb(int argc, char *argv[]) {
-  int it = atoi(argv[2]);
-  YREAL dx = atof(argv[3]);
+  int it = atoi(argv[1]);
+  int ix,iy;
+  YREAL dx = atof(argv[2]);
   for (iy=0;iy<YA1_Soce;iy++)
-    for (ix=0;ix<YA2_Soce;ix++) 
-      YS_Hfil(0,iy,ix,it) += randn(0,dx);
+    for (ix=0;ix<YA2_Soce;ix++)
+	YS_Hfil(0,iy,ix,it) += randn(0,dx);
+      
 }
 
 void xload_init(int argc, char *argv[]) {

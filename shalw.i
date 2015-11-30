@@ -42,12 +42,12 @@ xwind 0.015
 xdisplay
 set_modeltime 0
 read_lobs obs.dat
-xload_init snapshot.nc
+#xload_init snapshot.nc
 
-goto SPINUP
+#goto SPINUP
 #goto FORW1
 
-#goto EXP_JUM
+goto EXP_JUM
 goto TEST_OF
 
 FORW1
@@ -207,17 +207,26 @@ goto fin
 
 EXP_JUM
 forward
-xdisplay
 saveinit
 set_modeltime 0
 forward
-xsavenc state_true.nc state
-outoobs Hfil 1 300
-saveinit
-set_modeltime 0
-forward
-xsavenc state_bck.nc state
 
+xsavenc state_true.nc state
+xdisplay
+
+xperturb 300 0.1
+xdisplay
+outoobs Hfil 1 301
+xsavenc obs.nc state 300
+set_scoef Hfil 100
+
+xperturb 0 1
+outoebx Hfil 1 1
+set_modeltime 0
+forward
+xdisplay
+xsavenc state_bck.nc state
+set_bcoef Hfil 1
 
 
 setm_impres 3
