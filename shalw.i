@@ -1,30 +1,21 @@
 straj
 
-#xivg dt 1.50e3
-#xivg dx 5000
-#xivg dy 5000
-
 xivg dt 1800
-xivg dx 25000
-xivg dy 25000
+xivg dx 20000
+xivg dy 20000
 
-#xivg dt 1000
-#xivg dx 4000
-#xivg dy 4000
-xivg pcor 7e-5
-#xivg pcor 2e-5
+xivg pcor 3.5e-5
 xivg grav 0.02
-xivg dissip 5e-7
-#xivg dissip 0
+xivg dissip 2e-7
 xivg alpha 0.025
-#xivg alpha 0.15
 xivg hmoy 500
+xivg beta 2.11e-11
 
 #for wind forcing
 xivg rho0 1000
 
 #for diffusion
-xivg nu 9
+xivg nu 0.72
 #goto TEST_DF
 goto INIT
 
@@ -36,7 +27,7 @@ goto fin
 INIT
 xgauss 0 15000 15000
 #xwind 0.015
-xwind 0.015
+xwind 0.15
 #xporte 15 15000 15000
 #xcos 15 8000 8000
 xdisplay
@@ -44,7 +35,7 @@ set_modeltime 0
 read_lobs obs.dat
 #xload_init snapshot.nc
 
-#goto SPINUP
+goto SPINUP
 #goto FORW1
 
 goto EXP_JUM
@@ -66,6 +57,30 @@ forward
 xsavenc state_tmp.nc state
 
 xdisplay
+saveinit
+set_modeltime 0
+forward
+saveinit
+set_modeltime 0
+forward
+saveinit
+set_modeltime 0
+forward
+saveinit
+set_modeltime 0
+forward
+saveinit
+set_modeltime 0
+forward
+saveinit
+set_modeltime 0
+forward
+saveinit
+set_modeltime 0
+forward
+saveinit
+set_modeltime 0
+forward
 saveinit
 set_modeltime 0
 forward

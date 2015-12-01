@@ -88,7 +88,9 @@ extern int Yobs_insert_data (char *nmmod, int sortie, int iaxe, int jaxe, int ka
 			     int pdt, YREAL val);
 extern void       Yrazgrad_all();
 
-double dx,dy,dedt,svdedt,pcor,grav,dissip,hmoy,alpha,gb,gmx,gsx,gmy,gsy,rho0, nu;
+double dx,dy,dedt,svdedt,pcor,grav,dissip,hmoy,alpha,gb,gmx,gsx,gmy,gsy,rho0, nu,beta;
+YREAL fcor[SZY];//fcor = pcor(y0)+beta*(y-y0)
+int flag_cor=0; //+1 si init dy, +2 si init pcor, +4 si init beta
 void savestate();
 void erase_lobs();
 void clear_Yst_nodo(struct Yst_nodo *n_obs, int lev, int max);
@@ -115,6 +117,15 @@ void appli_start(int argc, char *argv[]){
   // ncinit();
 #endif
   test_seldon();
+
+}
+
+void init_coriolis () {
+  printf("init coriolis\n");
+  int y0=SZY/2;
+  //Init de coriolis
+  for (int iy=0;iy<SZY;iy++)
+    fcor[iy]=pcor + beta * dy * (iy - y0);
 
 }
 void before_it(int nit){}
@@ -172,8 +183,8 @@ if (lobs == NULL || nobs == 0) {
  //printf("---forward(i=%d)---\n",i);
  Yforward(-1, 0);
  for (int i = 0 ; i < nobs ; i++) {
-   lobs[i]->val = YS_Hfil(0,lobs[i]->Y,lobs[i]->X,lobs[i]->T);
-   Yobs_insert_data("Hfil",0,lobs[i]->Y,lobs[i]->X,0,lobs[i]->T,lobs[i]->val);
+   lobs[i]->val = YS_Hfil(0,lobs[i]->X,lobs[i]->Y,lobs[i]->T);
+   Yobs_insert_data("Hfil",0,lobs[i]->X,lobs[i]->Y,0,lobs[i]->T,lobs[i]->val);
  }
  after_it(1);
  Yset_modeltime(0);
@@ -223,9 +234,9 @@ void convol_obs(int iobs, int sz) {
  for (i=0;i<2*sz+1;i++)
    for (j=0;j<2*sz+1;j++)
      {
-       mu += YS_Hfil(0,yy[i],xx[j],lobs[iobs]->T)*dval[i][j];
-       Yobs_insert_data("Hfil",0,yy[i],xx[j],0,lobs[iobs]->T,YS_Hfil(0,yy[i],xx[j],lobs[iobs]->T));
-       YS_Hfil(0,yy[i],xx[j],lobs[iobs]->T)+=dval[i][j];
+       mu += YS_Hfil(0,xx[i],yy[j],lobs[iobs]->T)*dval[i][j];
+       Yobs_insert_data("Hfil",0,xx[i],yy[j],0,lobs[iobs]->T,YS_Hfil(0,xx[i],yy[j],lobs[iobs]->T));
+       YS_Hfil(0,xx[i],yy[j],lobs[iobs]->T)+=dval[i][j];
      }
 	lobs[iobs]->val = mu;                                        ;
 
@@ -355,11 +366,11 @@ void xwind (int argc, char *argv[]){
 	  gsx = SZX*dx / 20 ;
 	  gsy = SZY*dy / 20 ;
 	}
-	YREAL Lx = SZX*dx;
+	//	YREAL Lx = SZX*dx;
 	YREAL Ly = SZY*dy;
 	
-	for (int j = 0; j<SZY; j++)
-	  for (int i = 0; i<SZX; i++) {
+	for (int i = 0; i<SZX; i++)
+	  for (int j = 0; j<SZY; j++) {
 	    YS1_Taux(i,j) = tau0 * 
 	      //exp( -pow((i*dx-gmx)/gsx,2) /2.) *
 	      //exp(-pow((j*dy-gmy)/gsy,2) /2.) *
@@ -391,8 +402,8 @@ void xgauss(int argc, char *argv[]){
 	      gmx = atof(argv[2]); gsx = atof(argv[3]);
 	      gmy = atof(argv[4]); gsy = atof(argv[5]);
 	    }
-        for (int j = 0; j<SZY; j++)
-	  for (int i = 0; i<SZX; i++)
+        for (int i = 0; i<SZX; i++)
+	  for (int j = 0; j<SZY; j++)
 	    YS_Hfil(0,i,j,0) = gb*(exp( -pow((i*dx-gmx)/gsx,2) /2.))
 	      *(exp(-pow((j*dy-gmy)/gsy,2) /2.));
 }
@@ -406,8 +417,8 @@ void xvitgeo(){
 	fprintf(stderr,"xvitgeo : Warning, geostrophy computation is included in the model\n");
 #endif
 	gf = (grav / pcor);
-	for(int j=0; j<SZY; j++)
-	  for(int i=0; i<SZX; i++){ 
+	for(int i=0; i<SZX; i++)
+	  for(int j=0; j<SZY; j++){ 
 	    gfh=gf*YS_Hfil(0,i,j,0);
 	    YS_Ufil(0,i,j,0)=gfh*(j*dy-gmy)/(gsy*gsy);
             YS_Vfil(0,i,j,0)=gfh*-(i*dx-gmx)/(gsx*gsx);
@@ -459,28 +470,40 @@ void xivg(int argc,char *argv[]){
 			
 	if       (strcmp(argv[1], "dt") == 0) dedt=val;
 	else if  (strcmp(argv[1], "dx") == 0) dx=val;
-	else if  (strcmp(argv[1], "dy") == 0) dy=val;
-	else if  (strcmp(argv[1], "pcor") == 0) pcor=val;
+	else if  (strcmp(argv[1], "dy") == 0) { 
+	  dy=val;
+	  flag_cor=flag_cor-flag_cor%2 + 1 ;
+	}
+
+	else if  (strcmp(argv[1], "pcor") == 0) {
+	  pcor=val;
+	  flag_cor=4*(flag_cor/4)+(flag_cor%2) + 2;
+	}
 	else if  (strcmp(argv[1], "grav") == 0) grav=val;
 	else if  (strcmp(argv[1], "dissip") == 0) dissip=val;
 	else if  (strcmp(argv[1], "hmoy") == 0) hmoy=val;
 	else if  (strcmp(argv[1], "alpha") == 0) alpha=val;
 	else if  (strcmp(argv[1], "rho0") == 0) rho0=val;
 	else if  (strcmp(argv[1], "nu") == 0) nu=val;
+	else if  (strcmp(argv[1], "beta")== 0) {
+	  beta=val;
+	  flag_cor=(flag_cor%4)+4;
+	}
+	if (flag_cor==7) init_coriolis() ;
 }
 
 void savestate() {
  int it,ix,iy;
   for (it=0;it<YNBALLTIME_Toce;it++)
-    for (iy=0;iy<YA1_Soce;iy++)
-      for (ix=0;ix<YA2_Soce;ix++)
+    for (ix=0;ix<YA1_Soce;ix++)
+      for (iy=0;iy<YA2_Soce;iy++)
 	{
-	  state[0][it][iy][ix]=YS_Hfil(0,iy,ix,it);
-	  state[1][it][iy][ix]=YS_Ufil(0,iy,ix,it);
-	  state[2][it][iy][ix]=YS_Vfil(0,iy,ix,it);
-	  state[3][it][iy][ix]=YS_Hphy(0,iy,ix,it);
-	  state[4][it][iy][ix]=YS_Uphy(0,iy,ix,it);
-	  state[5][it][iy][ix]=YS_Vphy(0,iy,ix,it);	 
+	  state[0][it][iy][ix]=YS_Hfil(0,ix,iy,it);
+	  state[1][it][iy][ix]=YS_Ufil(0,ix,iy,it);
+	  state[2][it][iy][ix]=YS_Vfil(0,ix,iy,it);
+	  state[3][it][iy][ix]=YS_Hphy(0,ix,iy,it);
+	  state[4][it][iy][ix]=YS_Uphy(0,ix,iy,it);
+	  state[5][it][iy][ix]=YS_Vphy(0,ix,iy,it);	 
 	}
 
 }
@@ -488,11 +511,11 @@ void savestate() {
 void saveinit() {
   //Save state at the end of the trajectory in the init
   int ix,iy;
-    for (iy=0;iy<YA1_Soce;iy++)
-      for (ix=0;ix<YA2_Soce;ix++) {
-	YS_Hfil(0,iy,ix,0) = YS_Hfil(0,iy,ix,YNBALLTIME_Toce-1);
-	YS_Ufil(0,iy,ix,0) = YS_Ufil(0,iy,ix,YNBALLTIME_Toce-1);
-	YS_Vfil(0,iy,ix,0) = YS_Vfil(0,iy,ix,YNBALLTIME_Toce-1);
+    for (ix=0;ix<YA1_Soce;ix++)
+      for (iy=0;iy<YA2_Soce;iy++) {
+	YS_Hfil(0,ix,iy,0) = YS_Hfil(0,ix,iy,YNBALLTIME_Toce-1);
+	YS_Ufil(0,ix,iy,0) = YS_Ufil(0,ix,iy,YNBALLTIME_Toce-1);
+	YS_Vfil(0,ix,iy,0) = YS_Vfil(0,ix,iy,YNBALLTIME_Toce-1);
 
       }
 }
@@ -512,11 +535,11 @@ void xsavestate(int argc,char *argv[]){
   }
   int it,ix,iy;
   for (it=0;it<YNBALLTIME_Toce;it++)
-    for (iy=0;iy<YA1_Soce;iy++)
-      for (ix=0;ix<YA2_Soce;ix++)
+    for (ix=0;ix<YA1_Soce;ix++)
+      for (iy=0;iy<YA2_Soce;iy++)
 	{
-	  fprintf(fid,"%d %d %d ",it,iy,ix);
-	  fprintf(fid,"%g %g %g %g %g %g\n",YS_Hfil(0,iy,ix,it),YS_Ufil(0,iy,ix,it),YS_Vfil(0,iy,ix,it),YS_Hphy(0,iy,ix,it),YS_Uphy(0,iy,ix,it),YS_Vphy(0,iy,ix,it));
+	  fprintf(fid,"%d %d %d ",it,ix,iy);
+	  fprintf(fid,"%g %g %g %g %g %g\n",YS_Hfil(0,ix,iy,it),YS_Ufil(0,ix,iy,it),YS_Vfil(0,ix,iy,it),YS_Hphy(0,ix,iy,it),YS_Uphy(0,ix,iy,it),YS_Vphy(0,ix,iy,it));
 	}
   fclose(fid);
 }
@@ -761,9 +784,9 @@ void xperturb(int argc, char *argv[]) {
   int it = atoi(argv[1]);
   int ix,iy;
   YREAL dx = atof(argv[2]);
-  for (iy=0;iy<YA1_Soce;iy++)
-    for (ix=0;ix<YA2_Soce;ix++)
-	YS_Hfil(0,iy,ix,it) += randn(0,dx);
+  for (ix=0;ix<YA1_Soce;ix++)
+    for (iy=0;iy<YA2_Soce;iy++)
+	YS_Hfil(0,ix,iy,it) += randn(0,dx);
       
 }
 
@@ -771,17 +794,17 @@ void xload_init(int argc, char *argv[]) {
   YREAL data[SZY][SZX];
   int ix,iy;
   readnc(argv[1],"Hfil",data,0);
-  for (iy=0;iy<YA1_Soce;iy++)
-    for (ix=0;ix<YA2_Soce;ix++) 
-      YS_Hfil(0,iy,ix,0) = data[iy][ix];
+  for (ix=0;ix<YA1_Soce;ix++)
+    for (iy=0;iy<YA2_Soce;iy++) 
+      YS_Hfil(0,ix,iy,0) = data[iy][ix];
   readnc(argv[1],"Ufil",data,0);
-  for (iy=0;iy<YA1_Soce;iy++)
-    for (ix=0;ix<YA2_Soce;ix++) 
-      YS_Ufil(0,iy,ix,0) = data[iy][ix];
+  for (ix=0;ix<YA1_Soce;ix++)
+    for (iy=0;iy<YA2_Soce;iy++) 
+      YS_Ufil(0,ix,iy,0) = data[iy][ix];
   readnc(argv[1],"Vfil",data,0);
-  for (iy=0;iy<YA1_Soce;iy++)
-    for (ix=0;ix<YA2_Soce;ix++) 
-      YS_Vfil(0,iy,ix,0) = data[iy][ix];
+  for (ix=0;ix<YA1_Soce;ix++)
+    for (iy=0;iy<YA2_Soce;iy++) 
+      YS_Vfil(0,ix,iy,0) = data[ix][iy];
   
 }
 

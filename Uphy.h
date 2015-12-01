@@ -4,7 +4,7 @@ forward(YREAL ufil, YREAL lamv, YREAL gradx, YREAL hzp, YREAL hzm, YREAL tau_for
   if (Yt == 1) {
 #ifdef GEOSTROPHY
     // printf("(%d,%d) %f %f -----",Yi,Yj,hzp,hzm);
-    YS1 =  - (grav / pcor) * (hzp - hzm)/dy;
+    YS1 =  - (grav / fcor[Yj]) * (hzp - hzm)/dy;
 #else
     YS1 = ufil ;
 #endif
@@ -28,8 +28,8 @@ backward(YREAL ufil, YREAL lamv, YREAL gradx, YREAL hzp, YREAL hzm, YREAL tau_fo
 {
   if (Yt == 1) {
 #ifdef GEOSTROPHY
-    YJ1I4 = - (grav/pcor)/dy;
-    YJ1I5 =   (grav/pcor)/dy;
+    YJ1I4 = - (grav/fcor[Yj])/dy;
+    YJ1I5 =   (grav/fcor[Yj])/dy;
 #else
     YJ1I1 = 1 ;
 #endif  

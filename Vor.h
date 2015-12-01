@@ -4,7 +4,7 @@ forward(YREAL vp, YREAL vm, YREAL up, YREAL um)
 #ifndef K_LIN
   ynlin = (1.0/dx)*(vp-vm) - (1.0/dy)*(up-um) ;
 #endif
-  YS1 = ynlin + pcor ;
+  YS1 = ynlin + fcor[Yj] ;
 }
 
 backward(YREAL vp, YREAL vm, YREAL up, YREAL um) 

@@ -1,17 +1,17 @@
 //#define LIN
 
-defval SZX 80
+defval SZX 80 
 defval SZY 80
 defval SZU 1 
-defval SZT 300
-defval SZA 301
+defval SZT 1500
+defval SZA 1501
 //defval K_LIN 
  
 hat_name "shalw.h" "renorm.h" 
 
 option o_gradtest
 //option o_parallel
-option o_m1qn3
+option o_m1qn3 
 //option o_dbg_nanf
  
 exec disp_option
@@ -161,7 +161,7 @@ order modinspace Soce
 	Difv
    	Lamu
 	Lamv
-	Gradx
+	Gradx 
 	Grady
 	Uphy 
 	Vphy

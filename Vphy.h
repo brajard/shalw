@@ -2,7 +2,7 @@ forward(YREAL vfil, YREAL lamu, YREAL grady, YREAL hzp, YREAL hzm, YREAL tau_for
 {
   if (Yt == 1) {
 #ifdef GEOSTROPHY
-    YS1 =  (grav / pcor) * (hzp - hzm)/dx;
+    YS1 =  (grav / fcor[Yj]) * (hzp - hzm)/dx;
 #else
     YS1 = vfil ;
 #endif
@@ -24,8 +24,8 @@ backward(YREAL vfil, YREAL lamu, YREAL grady, YREAL hzp, YREAL hzm, YREAL tau_fo
 {
  if (Yt == 1) {
 #ifdef GEOSTROPHY
-    YJ1I4 =  (grav/pcor)/dx;
-    YJ1I5 = -(grav/pcor)/dx;
+    YJ1I4 =  (grav/fcor[Yj])/dx;
+    YJ1I5 = -(grav/fcor[Yj])/dx;
 #else
     YJ1I1 = 1 ;
 #endif  
