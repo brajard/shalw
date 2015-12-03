@@ -91,6 +91,7 @@ extern void       Yrazgrad_all();
 double dx,dy,dedt,svdedt,pcor,grav,dissip,hmoy,alpha,gb,gmx,gsx,gmy,gsy,rho0, nu,beta;
 YREAL fcor[SZY];//fcor = pcor(y0)+beta*(y-y0)
 int flag_cor=0; //+1 si init dy, +2 si init pcor, +4 si init beta
+int cor_computed=0; //if cor is not computed yet.
 void savestate();
 void erase_lobs();
 void clear_Yst_nodo(struct Yst_nodo *n_obs, int lev, int max);
@@ -472,11 +473,14 @@ void xivg(int argc,char *argv[]){
 	else if  (strcmp(argv[1], "dx") == 0) dx=val;
 	else if  (strcmp(argv[1], "dy") == 0) { 
 	  dy=val;
+	  cor_computed=0;
 	  flag_cor=flag_cor-flag_cor%2 + 1 ;
 	}
 
 	else if  (strcmp(argv[1], "pcor") == 0) {
 	  pcor=val;
+	  cor_computed=0;
+
 	  flag_cor=4*(flag_cor/4)+(flag_cor%2) + 2;
 	}
 	else if  (strcmp(argv[1], "grav") == 0) grav=val;
@@ -487,9 +491,14 @@ void xivg(int argc,char *argv[]){
 	else if  (strcmp(argv[1], "nu") == 0) nu=val;
 	else if  (strcmp(argv[1], "beta")== 0) {
 	  beta=val;
+	  cor_computed=0;
+
 	  flag_cor=(flag_cor%4)+4;
 	}
-	if (flag_cor==7) init_coriolis() ;
+	if (flag_cor==7 && cor_computed==0) {
+	  init_coriolis() ;
+	  cor_computed=1;
+	}
 }
 
 void savestate() {
