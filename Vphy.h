@@ -1,37 +1,46 @@
-forward(YREAL a, YREAL b, YREAL c, YREAL d, YREAL e, YREAL f, YREAL g, YREAL hzp, YREAL hzm)
+forward(YREAL vfil, YREAL lamu, YREAL grady, YREAL hzp, YREAL hzm, YREAL tau_fory, YREAL difv)
 {
   if (Yt == 1) {
 #ifdef GEOSTROPHY
-    YS1 =  (grav / pcor) * (hzp - hzm)/dx;
+    YS1 =  (grav / fcor[Yj]) * (hzp - hzm)/dx;
 #else
-    YS1 = a ;
+    YS1 = vfil ;
 #endif
 
   }
-  else
-    if(Yj == 0)
+  else {
+    YREAL coef = 1 ;
+    if(Yj == 0 )
       YS1 = 0;
-    else YS1=a+dedt*((-grav/dy)*(b-c)-(pcor/4)*(d+e+f+g)-dissip*a);
+    else {
+      if (Yi ==0)
+	coef = 2 ; //to compensate the vorticity equal to zero
+      YS1 = vfil + dedt*(-coef*lamu - grady/dy  -dissip*vfil + tau_fory + difv);
+    }
+  }
 }
 
-backward(YREAL a, YREAL b, YREAL c, YREAL d, YREAL e, YREAL f, YREAL g, YREAL hzp, YREAL hzm)
+backward(YREAL vfil, YREAL lamu, YREAL grady, YREAL hzp, YREAL hzm, YREAL tau_fory, YREAL difv)
 {
  if (Yt == 1) {
 #ifdef GEOSTROPHY
-    // printf("(%d,%d) %f %f -----",Yi,Yj,hzp,hzm);
-    //    YS1 =  - (grav / pcor) * (hzp - hzm)/dy;
-    YJ1I8 =  (grav/pcor)/dx;
-    YJ1I9 = -(grav/pcor)/dx;
+    YJ1I4 =  (grav/fcor[Yj])/dx;
+    YJ1I5 = -(grav/fcor[Yj])/dx;
 #else
     YJ1I1 = 1 ;
 #endif  
   }
-  else
-	if(Yj>0)
-	{
-	  YJ1I1 = 1-dedt*dissip;
-	  YJ1I2 = -(dedt*grav)/dx;
-	  YJ1I3 = -YJ1I2;
-	  YJ1I4 = YJ1I5 = YJ1I6 = YJ1I7 = -(dedt*pcor)/4;
-	}  
+ else {
+   YREAL coef = 1;
+   if(Yj>0)
+     {
+       if (Yi == 0)
+	 coef = 2;
+       YJ1I1 = 1-dedt*dissip ;
+       YJ1I2 = -coef*dedt ;
+       YJ1I3 = -dedt/dy ;
+       YJ1I6 = dedt ;
+       YJ1I7 = dedt ;
+     }  
+ }
 }
