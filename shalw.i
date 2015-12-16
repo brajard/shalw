@@ -25,7 +25,7 @@ goto fin
 #testdf 50 10 1 10 1 %0.000001 0.0001
 
 INIT
-xgauss 0 15000 15000
+#xgauss 0 15000 15000
 #xwind 0.015
 xwind 0.15
 #xporte 15 15000 15000
@@ -33,9 +33,9 @@ xwind 0.15
 xdisplay
 set_modeltime 0
 read_lobs obs.dat
-#xload_init snapshot.nc
+xload_init snapshot_10.nc
 
-goto SPINUP
+#goto SPINUP
 #goto FORW1
 
 goto EXP_JUM
@@ -110,7 +110,7 @@ set_modeltime 0
 forward
 
 xsavenc state_true.nc state
-xsavenc snapshot.nc state 1500
+xsavenc snapshot_10.nc state 1461
 goto fin
 
 ADJOINT
@@ -221,6 +221,43 @@ xsavenc state_4dvar.nc state
 goto fin
 
 EXP_JUM
+
+#True
+xload_init snapshot_10.nc
+set_modeltime 0
+forward
+xsavenc state_true.nc state
+
+#Obs
+xdisplay
+xivg sigper 1
+load_allobs
+xsave_obs obs_val.dat
+
+#First guess
+xload_init snapshot_11.nc
+set_modeltime 0
+forward
+xsavenc state_bck.nc state
+
+#Assimil
+setm_impres 3
+setm_io 6
+setm_mode 0
+#set_nbiter 100
+set_nbiter 20
+setm_nsim 20
+setm_dxmin 1.0e-12
+setm_epsg 1.0e-12
+setm_ddf1 1.0
+
+RUNM
+xsavenc state_4dvar.nc state
+
+
+goto fin
+
+EXP_JUM_OLD
 forward
 saveinit
 set_modeltime 0
@@ -248,10 +285,10 @@ setm_impres 3
 setm_io 6
 setm_mode 0
 #set_nbiter 100
-set_nbiter 20
-setm_nsim 20
-setm_dxmin 1.0e-12
-setm_epsg 1.0e-12
+set_nbiter 40
+setm_nsim 40
+setm_dxmin 1.0e-10
+setm_epsg 1.0e-8
 setm_ddf1 1.0
 
 RUNM

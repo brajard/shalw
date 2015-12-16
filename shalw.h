@@ -88,7 +88,7 @@ extern int Yobs_insert_data (char *nmmod, int sortie, int iaxe, int jaxe, int ka
 			     int pdt, YREAL val);
 extern void       Yrazgrad_all();
 
-double dx,dy,dedt,svdedt,pcor,grav,dissip,hmoy,alpha,gb,gmx,gsx,gmy,gsy,rho0, nu,beta;
+double dx,dy,dedt,svdedt,pcor,grav,dissip,hmoy,alpha,gb,gmx,gsx,gmy,gsy,rho0, nu,beta,sigper=0;
 YREAL fcor[SZY];//fcor = pcor(y0)+beta*(y-y0)
 int flag_cor=0; //+1 si init dy, +2 si init pcor, +4 si init beta
 int cor_computed=0; //if cor is not computed yet.
@@ -183,14 +183,18 @@ if (lobs == NULL || nobs == 0) {
  before_it(1);
  //printf("---forward(i=%d)---\n",i);
  Yforward(-1, 0);
+ fprintf(stdout,"Perturbation appliquée : %g\n",sigper);
  for (int i = 0 ; i < nobs ; i++) {
    lobs[i]->val = YS_Hfil(0,lobs[i]->X,lobs[i]->Y,lobs[i]->T);
+   lobs[i]->val += randn(0,sigper);
    Yobs_insert_data("Hfil",0,lobs[i]->X,lobs[i]->Y,0,lobs[i]->T,lobs[i]->val);
  }
  after_it(1);
  Yset_modeltime(0);
 
 }
+
+
 
 void convol_obs(int iobs, int sz) {
   /*Convolue la ieme observation avec
@@ -465,6 +469,16 @@ void read_lobs(int argc, char *argv[]){
 
 }
 
+void xsave_obs(int argc, char *argv[]) {
+  FILE *fid;
+  fid=fopen(argv[1],"w");
+  for (int i=0;i<nobs;i++) {
+    fprintf(fid,"%d %d %d %g\n",lobs[i]->X,lobs[i]->Y,lobs[i]->T,lobs[i]->val);
+  }
+  fclose(fid);
+
+}
+
 void xivg(int argc,char *argv[]){
 	double val;
 	val = atof(argv[2]);
@@ -489,6 +503,7 @@ void xivg(int argc,char *argv[]){
 	else if  (strcmp(argv[1], "alpha") == 0) alpha=val;
 	else if  (strcmp(argv[1], "rho0") == 0) rho0=val;
 	else if  (strcmp(argv[1], "nu") == 0) nu=val;
+	else if  (strcmp(argv[1], "sigper") == 0) sigper = val;
 	else if  (strcmp(argv[1], "beta")== 0) {
 	  beta=val;
 	  cor_computed=0;
@@ -813,7 +828,7 @@ void xload_init(int argc, char *argv[]) {
   readnc(argv[1],"Vfil",data,0);
   for (ix=0;ix<YA1_Soce;ix++)
     for (iy=0;iy<YA2_Soce;iy++) 
-      YS_Vfil(0,ix,iy,0) = data[ix][iy];
+      YS_Vfil(0,ix,iy,0) = data[iy][ix];
   
 }
 
