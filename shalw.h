@@ -803,33 +803,69 @@ void xsavenc(int argc, char *argv[]) {
     savenc(argv[1],SNames,SUnits,SLong_Names,state,it);
   }
 }
-
 void xperturb(int argc, char *argv[]) {
   int it = atoi(argv[1]);
   int ix,iy;
   YREAL dx = atof(argv[2]);
   for (ix=0;ix<YA1_Soce;ix++)
     for (iy=0;iy<YA2_Soce;iy++)
-	YS_Hfil(0,ix,iy,it) += randn(0,dx);
-      
+      YS_Hfil(0,ix,iy,it) += randn(0,dx);
+  
 }
 
 void xload_init(int argc, char *argv[]) {
+  // Load initial state from nc file
+  // argv[1] filename
+  // argv[2] "std" for standard load "incr" to load the linward
   YREAL data[SZY][SZX];
+  int std = 1;
+  if (argc > 2) 
+    std = strcmp(argv[2],"incr") ;
+  
   int ix,iy;
   readnc(argv[1],"Hfil",data,0);
   for (ix=0;ix<YA1_Soce;ix++)
     for (iy=0;iy<YA2_Soce;iy++) 
-      YS_Hfil(0,ix,iy,0) = data[iy][ix];
+      if (std)
+	YS_Hfil(0,ix,iy,0) = data[iy][ix];
+      else
+	YG_Hfil(0,ix,iy,0) = data[iy][ix] - YS_Hfil(0,ix,iy,0);
+  
   readnc(argv[1],"Ufil",data,0);
   for (ix=0;ix<YA1_Soce;ix++)
     for (iy=0;iy<YA2_Soce;iy++) 
-      YS_Ufil(0,ix,iy,0) = data[iy][ix];
+      if (std)
+	YS_Ufil(0,ix,iy,0) = data[iy][ix];
+      else
+	YG_Ufil(0,ix,iy,0) = data[iy][ix] - YS_Ufil(0,ix,iy,0);
   readnc(argv[1],"Vfil",data,0);
   for (ix=0;ix<YA1_Soce;ix++)
     for (iy=0;iy<YA2_Soce;iy++) 
-      YS_Vfil(0,ix,iy,0) = data[iy][ix];
+      if (std)
+	YS_Vfil(0,ix,iy,0) = data[iy][ix];
+      else
+	YG_Vfil(0,ix,iy,0) = data[iy][ix] - YS_Vfil(0,ix,iy,0);
   
+}
+
+void update_incr () {
+  for (int it=0;it<YNBALLTIME_Toce;it++)
+    for (int ix=0;ix<YA1_Soce;ix++)
+      for (int iy = 0 ; iy < YA2_Soce ; iy++) {
+	YS_Hfil(0,ix,iy,it)+=YG_Hfil(0,ix,iy,it);
+	YS_Ufil(0,ix,iy,it)+=YG_Ufil(0,ix,iy,it);
+	YS_Vfil(0,ix,iy,it)+=YG_Vfil(0,ix,iy,it);
+	YS_Hphy(0,ix,iy,it)+=YG_Hphy(0,ix,iy,it);
+	YS_Uphy(0,ix,iy,it)+=YG_Uphy(0,ix,iy,it);
+	YS_Vphy(0,ix,iy,it)+=YG_Vphy(0,ix,iy,it);
+	
+	
+	
+      }
+}
+
+void linward () {
+  Ylinward(0);
 }
 
 int savenc(char filename[],char Names[NVARS][STRLEN],

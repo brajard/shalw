@@ -14,6 +14,7 @@ option o_gradtest
 //option o_parallel
 option o_m1qn3 
 //option o_dbg_nanf
+option o_varincr
  
 exec disp_option
 
@@ -26,7 +27,7 @@ space Soce_cst M SZX SZY Tcst
 
 modul Hfil  space Soce input 3 output 1 tempo cout target
 modul Ufil  space Soce input 3 output 1 tempo
-modul Vfil  space Soce input 3 output 1 tempo
+modul Vfil  space Soce input 3 output 1 tempo 
 modul Hphy  space Soce input 3 output 1 tempo
 modul Uphy  space Soce input 7 output 1 tempo
 modul Vphy  space Soce input 7 output 1 tempo
@@ -203,3 +204,5 @@ insert_fct     load_allobs
 insert_fct     saveinit
 insert_fct arg xperturb
 insert_fct arg xsave_obs
+insert_fct     linward
+insert_fct     update_incr

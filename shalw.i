@@ -38,7 +38,7 @@ xload_init snapshot_10.nc
 
 #goto SPINUP
 #goto FORW1
-
+#goto FORWLIN
 goto EXP_JUM
 goto TEST_OF
 
@@ -48,9 +48,29 @@ set_modeltime 0
 forward
 xdisplay
 xsavenc state_true.nc state
-goto fin
+goto FORWLIN
+#goto fin
 #goto ADJOINT
 goto RENORM
+
+goto fin
+
+FORWLIN
+saveinit
+set_modeltime 0
+forward
+xsavenc state_0.nc state
+
+xload_init snapshot_10.nc incr
+set_modeltime 0
+#forward
+linward
+update_incr
+xdisplay
+xsavenc state_true_lin.nc state
+#goto fin
+#goto ADJOINT
+#goto RENORM
 
 goto fin
 
@@ -128,7 +148,6 @@ goto fin
 
 
 
->>>>>>> forcing
 cost lms 0.5
 #testof 0.02 10 10 8
 print_cost ON
@@ -250,10 +269,11 @@ setm_mode 0
 #set_nbiter 100
 set_nbiter 20
 setm_nsim 20
+set_nbextl 1
+#SET_PCOEF 0
 setm_dxmin 1.0e-12
 setm_epsg 1.0e-12
 setm_ddf1 1.0
-
 RUNM
 xsavenc state_4dvar.nc state
 
