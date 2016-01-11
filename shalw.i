@@ -28,6 +28,7 @@ INIT
 #xgauss 0 15000 15000
 #xwind 0.015
 xwind 0.15
+set_balanced false
 #xporte 15 15000 15000
 #xcos 15 8000 8000
 xdisplay
@@ -37,6 +38,7 @@ read_lobs obs.dat
 xload_init snapshot_10.nc
 
 #goto SPINUP
+#goto FORW_BAL
 #goto FORW1
 #goto FORWLIN
 goto EXP_JUM
@@ -48,12 +50,24 @@ set_modeltime 0
 forward
 xdisplay
 xsavenc state_true.nc state
-goto FORWLIN
-#goto fin
+#goto FORWLIN
+goto fin
 #goto ADJOINT
 goto RENORM
 
 goto fin
+
+FORW_BAL
+xload_init snapshot_10.nc
+set_balanced true
+set_modeltime 0
+forward
+xdisplay
+xsavenc state_balanced.nc state
+
+goto fin
+
+
 
 FORWLIN
 saveinit
@@ -246,6 +260,8 @@ EXP_JUM
 
 #True
 xload_init snapshot_10.nc
+set_balanced false
+
 set_modeltime 0
 forward
 xsavenc state_true.nc state
@@ -259,11 +275,12 @@ xsave_obs obs_val.dat
 #First guess
 xload_init snapshot_11.nc
 set_modeltime 0
+set_balanced true
 forward
 xsavenc state_bck.nc state
 
 #Assimil
-setm_impres 3
+setm_impres 6
 setm_io 6
 setm_mode 0
 #set_nbiter 100
@@ -273,7 +290,7 @@ set_nbextl 1
 #SET_PCOEF 0
 setm_dxmin 1.0e-12
 setm_epsg 1.0e-12
-setm_ddf1 1.0
+setm_ddf1 1000.0
 RUNM
 xsavenc state_4dvar.nc state
 

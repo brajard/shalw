@@ -92,6 +92,7 @@ double dx,dy,dedt,svdedt,pcor,grav,dissip,hmoy,alpha,gb,gmx,gsx,gmy,gsy,rho0, nu
 YREAL fcor[SZY];//fcor = pcor(y0)+beta*(y-y0)
 int flag_cor=0; //+1 si init dy, +2 si init pcor, +4 si init beta
 int cor_computed=0; //if cor is not computed yet.
+int balanced = 0 ;
 void savestate();
 void erase_lobs();
 void clear_Yst_nodo(struct Yst_nodo *n_obs, int lev, int max);
@@ -462,9 +463,16 @@ void read_lobs(int argc, char *argv[]){
     lobs[i] -> val = NAN;
 
   }
-  for (int i=0;i<nobs;i++) 
-    printf("%d %d %d\n",lobs[i]->X,lobs[i]->Y,lobs[i]->T);
-
+  if (nobs<10)
+    for (int i=0;i<nobs;i++) 
+      printf("%d %d %d\n",lobs[i]->X,lobs[i]->Y,lobs[i]->T);
+  else {
+    fprintf(stdout,"%d obs loaded\n",nobs);
+    for (int i=0;i<5;i++)
+      printf("%d %d %d\n",lobs[i]->X,lobs[i]->Y,lobs[i]->T);
+    printf("...\n");
+    printf("%d %d %d\n",lobs[nobs-1]->X,lobs[nobs-1]->Y,lobs[nobs-1]->T);
+  }
   fclose(fid);
 
 }
@@ -813,6 +821,17 @@ void xperturb(int argc, char *argv[]) {
   
 }
 
+void set_balanced (int argc, char *argv[]) {
+  if (!strcmp(argv[1],"true") | !strcmp(argv[1],"TRUE")) {
+    balanced = 1;
+    fprintf(stdout,"Initial velocities are balanced\n");
+  }
+ if (!strcmp(argv[1],"FALSE") | !strcmp(argv[1],"FALSE")) {
+    balanced = 0;
+    fprintf(stdout,"Initial velocities are balanced\n");
+  }
+  
+}
 void xload_init(int argc, char *argv[]) {
   // Load initial state from nc file
   // argv[1] filename
@@ -1013,3 +1032,5 @@ double randn (double mu, double sigma)
  
   return (mu + sigma * (double) X1);
 }
+
+

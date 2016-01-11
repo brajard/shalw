@@ -29,9 +29,11 @@ modul Hfil  space Soce input 3 output 1 tempo cout target
 modul Ufil  space Soce input 3 output 1 tempo
 modul Vfil  space Soce input 3 output 1 tempo 
 modul Hphy  space Soce input 3 output 1 tempo
-modul Uphy  space Soce input 7 output 1 tempo
-modul Vphy  space Soce input 7 output 1 tempo
+modul Uphy  space Soce input 12 output 1 tempo
+modul Vphy  space Soce input 12 output 1 tempo
 modul Hz    space Soce input 4 output 1 tempo
+modul Tau_forx_v space Soce clonof Hz
+modul Tau_fory_u space Soce clonof Hz
 modul Vit   space Soce input 5 output 1 tempo
 modul Vor   space Soce input 4 output 1 tempo
 modul Lamu  space Soce input 6 output 1 tempo
@@ -46,13 +48,13 @@ modul Taux  space Soce_cst noward output 1
 modul Tauy  space Soce_cst noward output 1
 modul Difu  space Soce  input 5 output 1 tempo
 modul Difv  space Soce  clonof Difu
-
+ 
 ctin Difu 1 from Uphy 1 i+1 j   t-1
 ctin Difu 2 from Uphy 1 i-1 j   t-1
 ctin Difu 3 from Uphy 1 i   j   t-1
 ctin Difu 4 from Uphy 1 i   j+1 t-1
 ctin Difu 5 from Uphy 1 i   j-1 t-1
-
+ 
 ctin Difv 1 from Vphy 1 i+1 j   t-1
 ctin Difv 2 from Vphy 1 i-1 j   t-1
 ctin Difv 3 from Vphy 1 i   j   t-1
@@ -64,7 +66,7 @@ ctin Tau_forx 1 from Taux 1 i   j
 ctin Tau_forx 2 from Hphy 1 i   j t-1
 ctin Tau_forx 3 from Hphy 1 i+1 j t-1
 
-ctin Tau_fory 1 from Tauy 1 i   j
+ctin Tau_fory 1 from Tauy 1 i   j 
 ctin Tau_fory 2 from Hphy 1 i   j-1 t-1
 ctin Tau_fory 3 from Hphy 1 i   j   t-1
 
@@ -86,10 +88,21 @@ ctin Hphy 1 from Hfil 1 i   j   t-1
 ctin Hphy 2 from Mcu  1 i   j   t
 ctin Hphy 3 from Mcv  1 i   j   t
 
-ctin Hz   1 from Hphy 1 i   j   t
-ctin Hz   2 from Hphy 1 i+1 j   t
-ctin Hz   3 from Hphy 1 i   j-1 t
-ctin Hz   4 from Hphy 1 i+1 j-1 t
+//ctin Hz   1 from Hphy 1 i   j   t
+//ctin Hz   2 from Hphy 1 i+1 j   t
+//ctin Hz   3 from Hphy 1 i   j-1 t
+//ctin Hz   4 from Hphy 1 i+1 j-1 t
+
+ctin Tau_forx_v 1 from Tau_forx 1 i j t
+ctin Tau_forx_v 2 from Tau_forx 1 i-1 j t
+ctin Tau_forx_v 3 from Tau_forx 1 i j-1 t
+ctin Tau_forx_v 4 from Tau_forx 1 i-1 j-1 t
+
+ctin Tau_fory_u 1 from Tau_fory 1 i j t
+ctin Tau_fory_u 2 from Tau_fory 1 i+1 j t
+ctin Tau_fory_u 3 from Tau_fory 1 i j+1 t
+ctin Tau_fory_u 4 from Tau_fory 1 i+1 j+1 t
+
 
 ctin Gradx 1 from Vit 1 i+1 j   t-1
 ctin Gradx 2 from Vit 1 i   j   t-1
@@ -112,18 +125,28 @@ ctin Mcv  5 from Hphy 1 i   j-1 t-1
 ctin Uphy 1 from Ufil  1 i   j   t-1
 ctin Uphy 2 from Lamv  1 i   j   t
 ctin Uphy 3 from Gradx 1 i   j   t
-ctin Uphy 4 from Hz   1 i   j+1 t
-ctin Uphy 5 from Hz   1 i   j   t
-ctin Uphy 6 from Tau_forx 1 i j t
-ctin Uphy 7 from Difu 1 i j t
+ctin Uphy 4 from Tau_forx 1 i j t
+ctin Uphy 5 from Difu 1 i j t
+ctin Uphy 6 from Tau_fory_u 1 i j t
+ctin Uphy 7  from Hphy 1 i   j+1 t
+ctin Uphy 8  from Hphy 1 i+1 j+1 t
+ctin Uphy 9  from Hphy 1 i   j   t
+ctin Uphy 10 from Hphy 1 i+1 j   t
+ctin Uphy 11 from Hphy 1 i   j-1 t
+ctin Uphy 12 from Hphy 1 i+1 j-1 t
 
 ctin Vphy 1 from Vfil  1 i   j   t-1
 ctin Vphy 2 from Lamu  1 i   j   t
 ctin Vphy 3 from Grady 1 i   j   t
-ctin Vphy 4 from Hz    1 i   j   t
-ctin Vphy 5 from Hz    1 i-1 j   t
-ctin Vphy 6 from Tau_fory 1 i j t
-ctin Vphy 7 from Difv 1  i   j   t
+ctin Vphy 4 from Tau_fory 1 i j t
+ctin Vphy 5 from Difv 1  i   j   t
+ctin Vphy 6 from Tau_forx_v 1 i j t
+ctin Vphy 7  from Hphy  1  i   j   t
+ctin Vphy 8  from Hphy  1  i+1 j   t
+ctin Vphy 9  from Hphy  1  i   j-1 t
+ctin Vphy 10 from Hphy  1  i+1 j-1 t
+ctin Vphy 11 from Hphy  1  i-1 j   t
+ctin Vphy 12 from Hphy  1  i-1 j-1 t
 
 ctin Hfil 1 from Hfil 1 i   j   t-1
 ctin Hfil 2 from Hphy 1 i   j   t-1
@@ -154,17 +177,20 @@ order modinspace Soce
   	Mcu
 	Mcv
         Hphy
-	Hz 
    forder
    order YA1 YA2
-   	Tau_forx
-	Tau_fory
+   	 Tau_forx
+	 Tau_fory
+   forder
+   order YA1 YA2
+   	Tau_forx_v
+	Tau_fory_u
 	Difu
 	Difv
    	Lamu
 	Lamv
 	Gradx 
-	Grady
+	Grady 
 	Uphy 
 	Vphy
 	Hfil 
@@ -198,7 +224,7 @@ insert_fct arg xload_init
 insert_fct arg read_lobs
 insert_fct     compute_adjoint
 insert_fct     renorm
-insert_fct     set_sol
+insert_fct     set_sol 
 insert_fct arg xset_maxiter
 insert_fct     load_allobs
 insert_fct     saveinit
@@ -206,3 +232,4 @@ insert_fct arg xperturb
 insert_fct arg xsave_obs
 insert_fct     linward
 insert_fct     update_incr
+insert_fct arg set_balanced
