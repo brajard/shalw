@@ -47,17 +47,20 @@ backward(YREAL vfil, YREAL lamu, YREAL grady, YREAL tau_fory, YREAL difv, YREAL 
 #else
     if (balanced == 1) {
       if (Yj!=0) {
-	YREAL c1,c2,c3;
+	YREAL c1,c2,c3,coef;
+	coef = 1;
 	c1 = (Yi == YA1_Soce-1) ? 0.5 : 0.25 ;
 	c2 = (Yi == 0 ) ? 0.5 : 0.25 ;
 	c3 = (Yi == 0 ) ? 0.5 : 0.25 ;
+	if (Yi==0 || Yi==YA1_Soce-1)
+	  coef = 2;
 	YJ1I6 = -c3/fcor[Yj] ;
-	YJ1I7 = (c1-c2)*(grav/fcor[Yj])/dx ;
-	YJ1I8 = c1*(grav/fcor[Yj])/dx ;
-	YJ1I9 = (c1-c2)*(grav/fcor[Yj])/dx ;
-	YJ1I10 = c1*(grav/fcor[Yj])/dx ;
-	YJ1I11 = -c2*(grav/fcor[Yj])/dx ;
-	YJ1I12 = -c2*(grav/fcor[Yj])/dx ;
+	YJ1I7 = coef*(c1-c2)*(grav/fcor[Yj])/dx ;
+	YJ1I8 = coef*c1*(grav/fcor[Yj])/dx ;
+	YJ1I9 = coef*(c1-c2)*(grav/fcor[Yj])/dx ;
+	YJ1I10 = coef*c1*(grav/fcor[Yj])/dx ;
+	YJ1I11 = -coef*c2*(grav/fcor[Yj])/dx ;
+	YJ1I12 = -coef*c2*(grav/fcor[Yj])/dx ;
 
       }
     }

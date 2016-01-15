@@ -56,13 +56,16 @@ backward(YREAL ufil, YREAL lamv, YREAL gradx, YREAL tau_forx, YREAL difu, YREAL 
 	c1 = (Yj == YA2_Soce-1) ? 0.5 : 0.25 ;
 	c2 = (Yj == 0) ? 0.5 : 0.25 ;
 	c3 = (Yj == YA2_Soce-1) ? 0.5 : 0.25 ;
+	YREAL coef = 1 ;
+	  if (Yj==0 || Yj==YA2_Soce-1)
+	    coef = 2;
 	YJ1I6  = c3/fcor[Yj] ;
-	YJ1I7  = -c1*(grav/fcor[Yj])/dy ;
-	YJ1I8  = -c1*(grav/fcor[Yj])/dy ;
-	YJ1I9  = -(c1-c2)*(grav/fcor[Yj])/dy ;
-	YJ1I10 = -(c1-c2)*(grav/fcor[Yj])/dy ;
-	YJ1I11 = c2*(grav/fcor[Yj])/dy ;
-	YJ1I12 = c2*(grav/fcor[Yj])/dy ;
+	YJ1I7  = -coef*c1*(grav/fcor[Yj])/dy ;
+	YJ1I8  = -coef*c1*(grav/fcor[Yj])/dy ;
+	YJ1I9  = -coef*(c1-c2)*(grav/fcor[Yj])/dy ;
+	YJ1I10 = -coef*(c1-c2)*(grav/fcor[Yj])/dy ;
+	YJ1I11 = coef*c2*(grav/fcor[Yj])/dy ;
+	YJ1I12 = coef*c2*(grav/fcor[Yj])/dy ;
       }
     }
     else
