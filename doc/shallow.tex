@@ -1,0 +1,225 @@
+  \documentclass[a4paper,12pt]{article}
+  
+  \usepackage[T1]{fontenc}
+  \usepackage{amsmath,amssymb,amsthm}
+  \usepackage{dsfont}\let\mathbb\mathds
+  \usepackage[english,frenchb]{babel}
+  \usepackage[all,dvips]{xy}
+  \usepackage{array}
+  \usepackage[utf8]{inputenc}
+\usepackage{version}
+\addtolength{\hoffset}{-0.5cm}
+\addtolength{\textwidth}{1cm}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+
+
+
+\begin{document}
+%\begin{comment}
+\section{Le shallow-water linéaire\label{sec:lin}}
+Les équations du shallow water considérées sont :
+\begin{eqnarray}
+\partial_tu & = & -g^*.\partial_xh + f . v - \gamma . u \nonumber \\
+\partial_tv & = & -g^*.\partial_yh - f . u - \gamma . v \label{shal-lin}\\
+\partial_th & = & - H.(\partial_xu + \partial_yv) \nonumber
+\end{eqnarray}
+
+La résolution numérique se fait sur une grille C d'Arakawa  :
+\begin{verbatim}
+h(i,j)  --  u(i,j) -- h(i+1,j)
+   |          |
+v(i,j)  --  z(i,j)
+   |
+h(i,j-1) 
+\end{verbatim}
+
+La partie dynamique :
+\begingroup\footnotesize
+\begin{eqnarray*}
+u_{ijt} & = & \hat{u}_{ijt-2}+2\Delta t \left [
+  -\frac{g^*}{\Delta x} (h_{i+1jt-1} - h_{ijt-1})
+  +\frac{f  }{4}        (v_{ijt-1}+v_{ij+1t-1}+v_{i+1jt-1}+v_{i+1j+1t-1})
+  -\gamma                \hat{u}_{ijt-2} \right ]\\
+v_{ijt} & = & \hat{v}_{ijt-2}+2\Delta t \left [
+  -\frac{g^*}{\Delta y} (h_{ijt-1} - h_{ij-1t-1})
+  -\frac{f  }{4}        (u_{i-1j-1t-1}+u_{i-1jt-1}+u_{ij-1t-1}+u_{ijt-1})
+  -\gamma                \hat{v}_{ijt-2} \right ]\\
+h_{ijt} & = & \hat{h}_{ijt-2}-2\Delta t . H \left [ 
+    \frac{1}{\Delta x} (u_{ijt-1} - u_{i-1jt-1}) 
+x  + \frac{1}{\Delta y} (v_{ij+1t-1} - v_{ijt-1}) \right ]
+\end{eqnarray*}
+\endgroup
+
+Le filtre d'Asselin :
+\begin{eqnarray*}
+\hat{u}_{ijt} & = & u_{ijt} + \alpha(\hat{u}_{ijt-1} - 2 u_{ijt} + u_{ijt+1}) \\
+\hat{v}_{ijt} & = & v_{ijt} + \alpha(\hat{v}_{ijt-1} - 2 v_{ijt} + v_{ijt+1}) \\
+\hat{h}_{ijt} & = & h_{ijt} + \alpha(\hat{h}_{ijt-1} - 2 h_{ijt} + h_{ijt+1})
+\end{eqnarray*}
+
+
+La variable d'état $X_t$ est donc composée de 6 champs :
+$$
+X_t=(u_t,v_t,h_t,\hat{u}_{t-1},\hat{v}_{t-1},\hat{h}_{t-1})
+$$
+Attention, dans le fichier fourni, le temps des variables filtrées est décalé de 1. De cette manière, la variable d'état devient en pratique :
+$$
+X_T=(u_T,v_T,h_T,\hat{u}_T,\hat{v}_T,\hat{h}_T)
+$$
+
+Dans l'expérience sélectionnée, on a choisi
+
+\begin{tabular}{rcl}
+$\Delta t$ & = & $1500 s$ \\
+$\Delta x$ & = & $5000 m$ \\
+$\Delta y$ & = & $5000 m$ \\
+$f$ & = & $0.0001 s^{-1}$\\
+$g^*$& = & $0.01 m.s^{-2}$\\
+$\gamma$& = & $0.00001s^{-1}$ \\
+$\alpha$& = & $0.15$\\
+$H$& = & $100 m$ \\
+
+\end{tabular}
+\iffalse
+\section{Shallow-water avec non-linéarités (non conservatif)}
+On ajoute un terme non linéaire aux vitesses prenant en compte l'advection de la dynamique :
+\begin{eqnarray}
+\partial_tu & = & -u.\partial_xu - v.\partial_yu - g^*.\partial_xh + f . v - \gamma . u \nonumber \\
+\partial_tv & = & -u.\partial_xv - v.\partial_yv - g^*.\partial_yh - f . u - \gamma . v \label{shal-nonlin-noncs}\\
+\partial_th & = & - H.(\partial_xu + \partial_yv) \nonumber
+\end{eqnarray}
+
+La version discrétisée nous donne alors :
+\begin{eqnarray*}
+u_{ijt} & = & \hat{u}_{ijt-2}+2\Delta t. (ADU + GHX + CORV + DISU) \\
+v_{ijt} & = & \hat{v}_{ijt-2}+2\Delta t. (ADV + GHY + CORU + DISV) \\
+h_{ijt} & = & \hat{h}_{ijt-2}-2\Delta t . H . ( DIV ) 
+\end{eqnarray*}
+où :
+\begin{eqnarray*}
+ADU & = &  - \frac{1}{2\Delta x}u_{ijt-1}.(u_{i+1jt-1}-u_{i-1jt-1}) -  \\
+    &   &   \frac{1}{8\Delta y}(v_{ijt-1}+v_{ij+1t-1}+v_{i+1jt-1}+v_{i+1j+1t-1}).(u_{ij+1t-1}-u_{ij-1t-1})\\
+GHX & = &  -\frac{g^*}{\Delta x} (h_{i+1jt-1} - h_{ijt-1}) \\
+CORV & = &  +\frac{f  }{4}        (v_{ijt-1}+v_{ij+1t-1}+v_{i+1jt-1}+v_{i+1j+1t-1}) \\
+DISU & = &  -\gamma                \hat{u}_{ijt-2} \\
+ADV & = & - \frac{1}{8\Delta x}(u_{i-1j-1t-1}+u_{i-1jt-1}+u_{ij-1t-1}+u_{ijt-1}).(v_{i+1jt-1}-v_{i-1jt-1}) - \\
+    &   & \frac{1}{2\Delta y}v_{ijt-1}.(v_{ij+1t-1}-v_{ij+1t-1})  \\
+GHY & = & -\frac{g^*}{\Delta y} (h_{ijt-1} - h_{ij-1t-1})\\
+CORU & = & -\frac{f  }{4}        (u_{i-1j-1t-1}+u_{i-1jt-1}+u_{ij-1t-1}+u_{ijt-1}) \\
+DISV & = &  -\gamma                \hat{v}_{ijt-2}\\
+DIV & = & \frac{1}{\Delta x} (u_{ijt-1} - u_{i-1jt-1}) 
+  + \frac{1}{\Delta y} (v_{ij+1t-1} - v_{ijt-1})\\
+\end{eqnarray*}
+\fi
+\section{Shallow-water avec non-linéarités}
+
+%L'équation~\ref{shal-nonlin-noncs} est équivalente à l'équation suivante :
+\begin{eqnarray}
+\partial_tu & = & + (f + z ).v  - \partial_x (\frac{u^2+v^2}{2} + g^*.h) - \gamma . u \nonumber \\
+\partial_tv & = & - (f + z ).u  - \partial_y (\frac{u^2+v^2}{2} + g^*.h) - \gamma . v \label{shal-nonlin-cs}\\
+\partial_th & = & - \partial_x(u(H+h)) - \partial_y(v(H+h)) \nonumber
+\end{eqnarray}
+Où $z$ désigne la vorticité définie par :
+\begin{equation}
+z = \partial_xv - \partial_yu
+\end{equation}
+
+On note $VIT$ la discrétisation de  $\frac{u^2+v^2}{2} + g^*h$ (point de grille h):
+\begin{equation*}
+VIT_{ijt-1} = \frac{1}{4} [(u_{i-1jt-1} + u_{ijt-1})^2+(v_{ijt-1} + v_{ij+1t-1})^2] + g^*.h_{ijt-1}
+\end{equation*}
+
+On note $VOR$ la discrétisation de $f+z$ (point de grille z):
+\begin{equation*}
+VOR_{ijt-1} = \frac{1}{\Delta x}(v_{i+1jt-1} - v_{ijt-1}) - \frac{1}{\Delta y}(u_{ijt-1}-u_{ij-1t-1}) + f 
+\end{equation*}
+
+On en déduit la discrétisation de~\ref{shal-nonlin-cs} :
+\begin{eqnarray*}
+u_{ijt} & = & \hat{u}_{ijt-2}+2\Delta t. (LAMV -  \frac{1}{\Delta x}GRADX - DISU ) \\
+v_{ijt} & = & \hat{v}_{ijt-2}+2\Delta t. (- LAMU -  \frac{1}{\Delta y}GRADY - DISV ) \\
+h_{ijt} & = & \hat{h}_{ijt-2}-2\Delta t . ( \frac{1}{\Delta x}MCU + \frac{1}{\Delta y}MCV)
+\end{eqnarray*}
+avec : 
+\begin{eqnarray*}
+LAMV & = & \frac{1}{8}(VOR_{ijt-1}+VOR_{ij+1t-1}).(v_{ijt-1}+v_{ij+1t-1}+v_{i+1jt-1}+v_{i+1j+1t-1})\\
+LAMU & = & \frac{1}{8}(VOR_{i-1jt-1}+VOR_{ijt-1}).(u_{i-1j-1t-1}+u_{i-1jt-1}+u_{ij-1t-1}+u_{ijt-1})\\
+GRADX & = &(VIT_{i+1jt-1}-VIT_{ijt-1})\\
+GRADY & = &(VIT_{ijt-1}-VIT_{ij-1t-1})\\
+DISU & = &  -\gamma                \hat{u}_{ijt-2}\\
+DISV & = & -\gamma                \hat{v}_{ijt-2}\\
+MCU  & = & H(u_{ijt-1} - u_{i-1jt-1}) + \frac{1}{2}
+(u_{ijt-1}(h_{ijt-1}+h_{i+1jt-1}) - u_{i-1jt-1}(h_{ijt-1}+h_{i-1jt-1}))\\
+MCV  & = & H(v_{ij+1t-1} - u_{ijt-1}) + \frac{1}{2}
+(v_{ij+1t-1}(h_{ij+1t-1}+h_{ijt-1}) - v_{ijt-1}(h_{ijt-1}+h_{ij-1t-1}))\\
+\end{eqnarray*}
+
+%DIV & = & \frac{1}{\Delta x} (u_{ijt-1} - u_{i-1jt-1}) 
+%  + \frac{1}{\Delta y} (v_{ij+1t-1} - v_{ijt-1})\\
+Si on se remet dans l'hypothèse linéaire, cette discrétisation est équivalente à celle proposée en section~\ref{sec:lin}
+
+\section{Shallow-water forcé}
+On se place dans la configuration de Krysta et al. 2001
+
+%L'équation~\ref{shal-nonlin-noncs} est équivalente à l'équation suivante :
+\begin{eqnarray}
+\partial_tu & = & + (f + z ).v  - \partial_x (\frac{u^2+v^2}{2} + g^*.h) + \frac{\tau_x}{\rho_0(H+h)} - \gamma . u + \nu\Delta u\nonumber \\
+\partial_tv & = & - (f + z ).u  - \partial_y (\frac{u^2+v^2}{2} + g^*.h) + \frac{\tau_y}{\rho_0(H+h)} - \gamma . v + \nu\Delta v\nonumber  \label{shal-nonlin-cs}\\
+\partial_th & = & - \partial_x(u(H+h)) - \partial_y(v(H+h)) \nonumber
+\end{eqnarray}
+
+On ajoute la discrétisation de la tension de vent $\frac{\tau}{\rho_0(H+h)}$ (point de grille u ou v selon que $\tau$=$\tau_x$ ou $\tau_y$) :
+\begin{eqnarray*}
+TAUX_{ijt} & = & \frac{\tau_x}{\rho_0(H+0.5\times(h_{ijt}+h_{i+1jt}))} \\
+TAUY_{ijt} & = & \frac{\tau_y}{\rho_0(H+0.5\times(h_{ij-1t}+h_{ijt}))}
+\end{eqnarray*}
+
+Et enfin, pour la diffusion :
+\begin{eqnarray*}
+DIFU_{ij} & = & \frac{u_{i+1j}+u_{i-1j}-2 u_{ij}}{\Delta x^2} + \frac{u_{ij+1}+u_{ij-1} -2 u_{ij}}{\Delta y^2} \\
+DIFV_{ij} & = & \frac{v_{i+1j}+v_{i-1j}- 2 v_{ij}}{\Delta x^2} + \frac{v_{ij+1}+v_{ij-1}-2 v{ij}}{\Delta y^2}  
+\end{eqnarray*}
+
+On en déduit la discrétisation de~\ref{shal-nonlin-cs} :
+\begin{eqnarray*}
+u_{ijt} & = & \hat{u}_{ijt-2}+2\Delta t. (LAMV -  \frac{1}{\Delta x}GRADX - DISU ) \\
+v_{ijt} & = & \hat{v}_{ijt-2}+2\Delta t. (- LAMU -  \frac{1}{\Delta y}GRADY - DISV ) \\
+h_{ijt} & = & \hat{h}_{ijt-2}-2\Delta t . ( \frac{1}{\Delta x}MCU + \frac{1}{\Delta y}MCV)
+\end{eqnarray*}
+avec : 
+\begin{eqnarray*}
+LAMV & = & \frac{1}{8}(VOR_{ijt-1}+VOR_{ij+1t-1}).(v_{ijt-1}+v_{ij+1t-1}+v_{i+1jt-1}+v_{i+1j+1t-1})\\
+LAMU & = & \frac{1}{8}(VOR_{i-1jt-1}+VOR_{ijt-1}).(u_{i-1j-1t-1}+u_{i-1jt-1}+u_{ij-1t-1}+u_{ijt-1})\\
+GRADX & = &(VIT_{i+1jt-1}-VIT_{ijt-1})\\
+GRADY & = &(VIT_{ijt-1}-VIT_{ij-1t-1})\\
+DISU & = &  -\gamma                \hat{u}_{ijt-2}\\
+DISV & = & -\gamma                \hat{v}_{ijt-2}\\
+MCU  & = & H(u_{ijt-1} - u_{i-1jt-1}) + \frac{1}{2}
+(u_{ijt-1}(h_{ijt-1}+h_{i+1jt-1}) - u_{i-1jt-1}(h_{ijt-1}+h_{i-1jt-1}))\\
+MCV  & = & H(v_{ij+1t-1} - u_{ijt-1}) + \frac{1}{2}
+(v_{ij+1t-1}(h_{ij+1t-1}+h_{ijt-1}) - v_{ijt-1}(h_{ijt-1}+h_{ij-1t-1}))\\
+\end{eqnarray*}
+
+\section{Intialisation des vitesses}
+En linéarisant l'équation~\ref{shal-nonlin-cs} et en négligeant le terme de diffusion, on obtient :
+
+\begin{eqnarray}
+g^*.\partial_x h - \frac{\tau_x}{\rho_0(H+h)} & = & + f.v   - \gamma . u \nonumber \\
+g^*.\partial_y h - \frac{\tau_y}{\rho_0(H+h)} & = & - f.u   - \gamma . v \nonumber  \label{eq-cs}\\
+\end{eqnarray}
+
+On note $A_x = g^*.\partial_x h - \frac{\tau_x}{\rho_0(H+h)}$ et
+$A_y = g^*.\partial_y h - \frac{\tau_y}{\rho_0(H+h)}$
+
+On a alors la solution suivante :
+\begin{eqnarray}
+u & = & - \frac{\gamma A_x + f A_y}{\gamma^2 + f^2} \nonumber \\
+v & = & + \frac{f A_x - \gamma A_y}{\gamma^2 + f^2} \label{sol-eq}\\
+\end{eqnarray}
+
+
+\end{document}
