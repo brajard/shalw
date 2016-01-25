@@ -22,7 +22,7 @@ forward(YREAL ufil, YREAL lamv, YREAL gradx, YREAL tau_forx, YREAL difu, YREAL t
 	    dyh = 2*dyh;
 	  Ay = grav * dyh/dy - c3 * tau_fory_u ;
 	  Ax = grav * dxh/dx - tau_forx ;
-	  YS1 = - (dissip*Ax + fcor[Yj]*Ay)/(dissip*dissip + fcor[Yj]*fcor[Yj]) ;
+	  YS1 = - (dissip0*Ax + fcor[Yj]*Ay)/(dissip0*dissip0 + fcor[Yj]*fcor[Yj]) ;
 	  
 	}
       } // if balanced is true
@@ -60,8 +60,8 @@ backward(YREAL ufil, YREAL lamv, YREAL gradx, YREAL tau_forx, YREAL difu, YREAL 
 	YREAL dAydI6,dAydyh,dAxdI4,dAxdxh;
 	YREAL dyhdI7, dyhdI8, dyhdI9, dyhdI10, dyhdI11, dyhdI12;
 	YREAL dxhdI9, dxhdI10 ;
-	YREAL denom = dissip*dissip + fcor[Yj]*fcor[Yj] ;
-	dydax = -dissip/denom ;
+	YREAL denom = dissip0*dissip0 + fcor[Yj]*fcor[Yj] ;
+	dydax = -dissip0/denom ;
 	dyday = -fcor[Yj]/denom ;
 	c1 = (Yj == YA2_Soce-1) ? 0.5 : 0.25 ;
 	c2 = (Yj == 0) ? 0.5 : 0.25 ;

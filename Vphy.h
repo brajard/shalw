@@ -21,7 +21,7 @@ forward(YREAL vfil, YREAL lamu, YREAL grady, YREAL tau_fory, YREAL difv, YREAL t
 	  dxh = 2*dxh;
 	Ax = grav * dxh/dx - c3 * tau_forx_v ;
 	Ay = grav * dyh/dy - tau_fory ;
-	YS1 = (fcor[Yj]*Ax - dissip*Ay)/(dissip*dissip + fcor[Yj]*fcor[Yj]) ;
+	YS1 = (fcor[Yj]*Ax - dissip0*Ay)/(dissip0*dissip0 + fcor[Yj]*fcor[Yj]) ;
 	//	YS1 = - c3 * tau_forx_v/fcor[Yj] + (grav/fcor[Yj]) * dh / dx ;
 
       }
@@ -56,10 +56,10 @@ backward(YREAL vfil, YREAL lamu, YREAL grady, YREAL tau_fory, YREAL difv, YREAL 
 	YREAL dAydI4,dAydyh,dAxdI6,dAxdxh;
 	YREAL dxhdI7, dxhdI8, dxhdI9, dxhdI10, dxhdI11, dxhdI12;
 	YREAL dyhdI7, dyhdI9 ;
-	YREAL denom = dissip*dissip + fcor[Yj]*fcor[Yj] ;
+	YREAL denom = dissip0*dissip0 + fcor[Yj]*fcor[Yj] ;
 
 	dydax = fcor[Yj]/denom ;
-	dyday = -dissip/denom ;
+	dyday = -dissip0/denom ;
 
 	coef = 1;
 	c1 = (Yi == YA1_Soce-1) ? 0.5 : 0.25 ;

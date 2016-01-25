@@ -2,6 +2,9 @@
 
 #define RENORM
 #define USE_NETCDF
+// Neglect dissipation in init term
+//#define DISSIP0 
+
 
 #ifdef USE_NETCDF
 #include <netcdf.h>
@@ -88,7 +91,7 @@ extern int Yobs_insert_data (char *nmmod, int sortie, int iaxe, int jaxe, int ka
 			     int pdt, YREAL val);
 extern void       Yrazgrad_all();
 
-double dx,dy,dedt,svdedt,pcor,grav,dissip,hmoy,alpha,gb,gmx,gsx,gmy,gsy,rho0, nu,beta,sigper=0;
+double dx,dy,dedt,svdedt,pcor,grav,dissip,dissip0,hmoy,alpha,gb,gmx,gsx,gmy,gsy,rho0, nu,beta,sigper=0;
 YREAL fcor[SZY];//fcor = pcor(y0)+beta*(y-y0)
 int flag_cor=0; //+1 si init dy, +2 si init pcor, +4 si init beta
 int cor_computed=0; //if cor is not computed yet.
@@ -506,7 +509,17 @@ void xivg(int argc,char *argv[]){
 	  flag_cor=4*(flag_cor/4)+(flag_cor%2) + 2;
 	}
 	else if  (strcmp(argv[1], "grav") == 0) grav=val;
-	else if  (strcmp(argv[1], "dissip") == 0) dissip=val;
+	else if  (strcmp(argv[1], "dissip") == 0) 
+	  {
+	    dissip=val;
+#ifdef DISSIP0
+	    dissip0 = 0 ;
+	    fprintf(stdout," dissipiation neglected in balance term\n");
+#else
+	    dissip0 = dissip ;
+#endif
+	  }
+	    
 	else if  (strcmp(argv[1], "hmoy") == 0) hmoy=val;
 	else if  (strcmp(argv[1], "alpha") == 0) alpha=val;
 	else if  (strcmp(argv[1], "rho0") == 0) rho0=val;
@@ -515,7 +528,7 @@ void xivg(int argc,char *argv[]){
 	else if  (strcmp(argv[1], "beta")== 0) {
 	  beta=val;
 	  cor_computed=0;
-
+	  
 	  flag_cor=(flag_cor%4)+4;
 	}
 	if (flag_cor==7 && cor_computed==0) {
