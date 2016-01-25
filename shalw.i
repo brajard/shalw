@@ -20,7 +20,9 @@ xivg nu 0.72
 goto INIT
 
 TEST_DF
-testdf 10 10 1 4 r %0.000001 0.0001
+set_balanced true
+
+testdf 80 80 1 2 r 0.0001 0.0001
 goto fin
 #testdf 50 10 1 10 1 %0.000001 0.0001
 
@@ -28,7 +30,7 @@ INIT
 #xgauss 0 15000 15000
 #xwind 0.015
 xwind 0.15
-set_balanced false
+
 #xporte 15 15000 15000
 #xcos 15 8000 8000
 xdisplay
@@ -42,17 +44,18 @@ xload_init snapshot_10.nc
 #goto FORW1
 #goto FORWLIN
 goto EXP_JUM
-goto TEST_OF
+#goto TEST_OF
 
 FORW1
 xload_init snapshot_10.nc
+set_balanced famse
 set_modeltime 0
 forward
 xdisplay
 xsavenc state_true.nc state
 #goto FORWLIN
-goto fin
-#goto ADJOINT
+#goto fin
+goto ADJOINT
 goto RENORM
 
 goto fin
@@ -206,20 +209,22 @@ set_modeltime 0
 FORWARD
 xsavenc state_a.nc state
 
-goto fin
+#goto fin
 goto TEST_OF
 
 goto fin
 
 TEST_OF
 
-read_lobs obs.dat
+#read_lobs obs.dat
 load_allobs
+set_balanced true
 #xgauss 0 15000 15000
 saveinit
 
 #goto M1QN3
-testof 1 1 10 15 0
+testof 1 1 10 10 0
+xsavenc state_a.nc state
 
 goto fin
 
@@ -285,14 +290,15 @@ setm_io 6
 setm_mode 0
 #set_nbiter 100
 set_nbiter 20
-setm_nsim 20
+setm_nsim 0
 set_nbextl 1
 #SET_PCOEF 0
 setm_dxmin 1.0e-12
 setm_epsg 1.0e-12
-setm_ddf1 1000.0
+setm_ddf1 10.0
 RUNM
 xsavenc state_4dvar.nc state
+xsavenc grad_4dvar.nc grad
 
 
 goto fin
@@ -326,7 +332,7 @@ setm_io 6
 setm_mode 0
 #set_nbiter 100
 set_nbiter 40
-setm_nsim 40
+setm_nsim 400
 setm_dxmin 1.0e-10
 setm_epsg 1.0e-8
 setm_ddf1 1.0
