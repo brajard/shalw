@@ -22,16 +22,16 @@ T(I+1)=[];
 end
 
 %%Exp 2
-if (false)
+if (true)
 Tmax=1461;
-xmax=80;
-ymax=80;
+xmax=79;
+ymax=79;
 
 nobs=100000;
 
 %X=nan*ones(nobs,1);
 
-[X,Y,T] = meshgrid(1:xmax,1:ymax,1:Tmax);
+[X,Y,T] = meshgrid(0:xmax,0:ymax,1:Tmax);
 
 Ind = randperm(numel(T));
 
