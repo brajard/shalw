@@ -22,7 +22,7 @@ goto INIT
 TEST_DF
 set_balanced true
 
-testdf 80 80 1 2 r 0.0001 0.0001
+testdf 80 80  1 2 r 0.0001 0.0001
 goto fin
 #testdf 50 10 1 10 1 %0.000001 0.0001
 
@@ -290,7 +290,7 @@ setm_io 6
 setm_mode 0
 #set_nbiter 100
 set_nbiter 20
-setm_nsim 0
+setm_nsim 20
 set_nbextl 1
 #SET_PCOEF 0
 setm_dxmin 1.0e-12

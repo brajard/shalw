@@ -17,7 +17,7 @@ option o_m1qn3
 option o_varincr
  
 exec disp_option
-
+ 
 traj Toce M SZU SZT
 traj Tcst M 0 1
 //traj Toce2 M SZU 0 2 SZT
@@ -54,7 +54,7 @@ ctin Difu 2 from Uphy 1 i-1 j   t-1
 ctin Difu 3 from Uphy 1 i   j   t-1
 ctin Difu 4 from Uphy 1 i   j+1 t-1
 ctin Difu 5 from Uphy 1 i   j-1 t-1
- 
+  
 ctin Difv 1 from Vphy 1 i+1 j   t-1
 ctin Difv 2 from Vphy 1 i-1 j   t-1
 ctin Difv 3 from Vphy 1 i   j   t-1
@@ -63,12 +63,12 @@ ctin Difv 5 from Vphy 1 i   j-1 t-1
 
 
 ctin Tau_forx 1 from Taux 1 i   j
-ctin Tau_forx 2 from Hphy 1 i   j t-1
-ctin Tau_forx 3 from Hphy 1 i+1 j t-1
+ctin Tau_forx 2 from Hphy 1 i   j t
+ctin Tau_forx 3 from Hphy 1 i+1 j t
 
 ctin Tau_fory 1 from Tauy 1 i   j 
-ctin Tau_fory 2 from Hphy 1 i   j-1 t-1
-ctin Tau_fory 3 from Hphy 1 i   j   t-1
+ctin Tau_fory 2 from Hphy 1 i   j-1 t
+ctin Tau_fory 3 from Hphy 1 i   j   t 
 
 ctin Lamu 1 from Vor  1 i-1 j   t-1
 ctin Lamu 2 from Vor  1 i   j t-1
