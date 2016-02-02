@@ -10,8 +10,8 @@ defval SZA 1462
  
 hat_name "shalw.h" "renorm.h" 
 
-option o_gradtest
-//option o_parallel
+//option o_gradtest
+option o_parallel
 option o_m1qn3 
 //option o_dbg_nanf
 option o_varincr
@@ -233,3 +233,4 @@ insert_fct arg xsave_obs
 insert_fct     linward
 insert_fct     update_incr
 insert_fct arg set_balanced
+insert_fct     load_bck

@@ -254,7 +254,7 @@ set_nbiter 20
 setm_nsim 20
 setm_dxmin 1.0e-12
 setm_epsg 1.0e-12
-setm_ddf1 1.0
+setm_ddf1 0.1
 
 RUNM
 xsavenc state_4dvar.nc state
@@ -262,10 +262,11 @@ xsavenc state_4dvar.nc state
 goto fin
 
 EXP_JUM
+cost lms 0.5
 
 #True
 xload_init snapshot_10.nc
-set_balanced false
+set_balanced true
 
 set_modeltime 0
 forward
@@ -274,11 +275,17 @@ xsavenc state_true.nc state
 #Obs
 xdisplay
 xivg sigper 1
+#scoef = 1/sigper^2
+set_scoef Hfil 1
 load_allobs
 xsave_obs obs_val.dat
 
 #First guess
-xload_init snapshot_11.nc
+#xload_init snapshot_11.nc
+xivg sigper 10
+set_bcoef Hfil 0.01
+load_bck
+
 set_modeltime 0
 set_balanced true
 forward
@@ -289,12 +296,12 @@ setm_impres 6
 setm_io 6
 setm_mode 0
 #set_nbiter 100
-set_nbiter 20
-setm_nsim 20
+set_nbiter 25
+setm_nsim 50
 set_nbextl 1
 #SET_PCOEF 0
-setm_dxmin 1.0e-12
-setm_epsg 1.0e-12
+setm_dxmin 1.0e-8
+setm_epsg 1.0e-8
 setm_ddf1 10.0
 RUNM
 xsavenc state_4dvar.nc state

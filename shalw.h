@@ -63,8 +63,8 @@ char SUnits[NVARS][STRLEN]={"meters","m/s","m/s","meters","m/s","m/s"};
 #define SELDON_DEBUG_LEVEL_4
 #define SELDON_WITH_LAPACK
 
-#include "/usr/home/jbrlod/usr/seldon-5.2/Seldon.hxx"
-
+//#include "/usr/home/jbrlod/usr/seldon-5.2/Seldon.hxx"
+#include "/home/ROCQ/clime/jbrajard/project/verdandi/verdandi-1.6.1/include/seldon/Seldon.hxx"
 
 using namespace Seldon;
 typedef double Real_wp;
@@ -89,6 +89,7 @@ const int TotS = SZY *SZX ;
 double randn (double mu, double sigma);
 extern int Yobs_insert_data (char *nmmod, int sortie, int iaxe, int jaxe, int kaxe,
 			     int pdt, YREAL val);
+extern int Youtoobs(YioKind yiokind, int cdesc, char *cdes[]);
 extern void       Yrazgrad_all();
 
 double dx,dy,dedt,svdedt,pcor,grav,dissip,dissip0,hmoy,alpha,gb,gmx,gsx,gmy,gsy,rho0, nu,beta,sigper=0;
@@ -173,7 +174,7 @@ short select_io(int indic, char *nmod, int sortie, int iaxe,
 
 void load_allobs() {
   //Load the state of the model as observation 
-
+  srand(300);
 if (lobs == NULL || nobs == 0) {
     fprintf(stderr,"load_allobs : no obs loaded");
     return;
@@ -198,7 +199,24 @@ if (lobs == NULL || nobs == 0) {
 
 }
 
-
+void load_bck() {
+  //Load the initial state of the model as background
+  //perturbation by sigper
+  srand(200);
+  char *opt[]={"outoebx","Hfil","1","1"};
+  //1 save state
+  int ix,iy;
+  int it=0;
+    for (ix=0;ix<YA1_Soce;ix++)
+      for (iy=0;iy<YA2_Soce;iy++)
+	{
+	  //	  state[0][it][iy][ix]=YS_Hfil(0,ix,iy,it);
+	  YS_Hfil(0,ix,iy,it) += randn(0,sigper);
+	  }
+    Youtoobs(YIO_OUTOEBX,4,opt);
+      
+    
+}
 
 void convol_obs(int iobs, int sz) {
   /*Convolue la ieme observation avec
@@ -828,6 +846,7 @@ void xperturb(int argc, char *argv[]) {
   int it = atoi(argv[1]);
   int ix,iy;
   YREAL dx = atof(argv[2]);
+  srand(100);
   for (ix=0;ix<YA1_Soce;ix++)
     for (iy=0;iy<YA2_Soce;iy++)
       YS_Hfil(0,ix,iy,it) += randn(0,dx);
