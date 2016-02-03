@@ -5,6 +5,8 @@
 // Neglect dissipation in init term
 //#define DISSIP0 
 
+//Fixe init of random generator
+//#define DEBUG_RAND
 
 #ifdef USE_NETCDF
 #include <netcdf.h>
@@ -174,7 +176,10 @@ short select_io(int indic, char *nmod, int sortie, int iaxe,
 
 void load_allobs() {
   //Load the state of the model as observation 
+#ifdef DEBUG_RAND
   srand(300);
+#endif 
+
 if (lobs == NULL || nobs == 0) {
     fprintf(stderr,"load_allobs : no obs loaded");
     return;
@@ -202,7 +207,9 @@ if (lobs == NULL || nobs == 0) {
 void load_bck() {
   //Load the initial state of the model as background
   //perturbation by sigper
+#ifdef DEBUG_RAND
   srand(200);
+#endif
   char *opt[]={"outoebx","Hfil","1","1"};
   //1 save state
   int ix,iy;
@@ -846,7 +853,9 @@ void xperturb(int argc, char *argv[]) {
   int it = atoi(argv[1]);
   int ix,iy;
   YREAL dx = atof(argv[2]);
+#ifdef DEBUG_RAND
   srand(100);
+#endif
   for (ix=0;ix<YA1_Soce;ix++)
     for (iy=0;iy<YA2_Soce;iy++)
       YS_Hfil(0,ix,iy,it) += randn(0,dx);
