@@ -234,3 +234,5 @@ insert_fct     linward
 insert_fct     update_incr
 insert_fct arg set_balanced
 insert_fct     load_bck
+insert_fct arg xread_namelist
+insert_fct     print_namelist

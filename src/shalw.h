@@ -22,6 +22,12 @@ struct obs {
   YREAL val;
 };
 
+/* Namelist variables */
+char namefile[STRLEN]="";
+int nopt = 0;
+char ** param = NULL;
+char ** value = NULL;
+
 /* list of obs */
 struct obs ** lobs = NULL ;
 int nobs ;
@@ -125,6 +131,13 @@ void appli_start(int argc, char *argv[]){
   // ncinit();
 #endif
   test_seldon();
+
+  if (argc>=3 && !strcmp(argv[1],"namelist")) {
+      strcpy(namefile,argv[2]);
+    }
+  printf("argc = %d\n",argc);
+  for (int i=0;i<argc;i++) 
+    printf("%d %s\n",i,argv[i]);
 
 }
 
@@ -1074,4 +1087,48 @@ double randn (double mu, double sigma)
   return (mu + sigma * (double) X1);
 }
 
+
+//Namelist related functions
+
+int xread_namelist(int argc, char* argv[]) {
+  if ((argc==1) & (namefile[0]=='\0')) {
+    fprintf(stderr,"Warning : no namelist specified\n");
+    return(1);
+  }
+  if (argc==2) {
+    strcpy(namefile,argv[1]);
+  }
+  fprintf(stdout,"Read namelist %s\n",namefile);
+  FILE *fid;
+  fid = fopen(namefile,"r");
+  if (fid==NULL) {
+    fprintf(stderr,"Error in opening namelist %s\n",namefile);
+    return(1);
+  }
+  char line[2*STRLEN];
+  char *newparam ;
+  char *newvalue ;
+  while(fgets(line,2*STRLEN,fid)!=NULL) {
+    if (line[0]!='#') {
+      nopt++;
+      newparam = (char *)malloc(STRLEN*sizeof(char));
+      newvalue = (char *)malloc(STRLEN*sizeof(char));
+      sscanf(line,"%s %s\n",newparam,newvalue);
+      param = (char **)realloc(param,nopt*sizeof(char *));
+      value = (char **)realloc(value,nopt*sizeof(char *));
+      param[nopt-1]=newparam;
+      value[nopt-1]=newvalue;
+    } //if != #
+    
+  } //while
+  return(1);
+}
+
+ void print_namelist() {
+   if (nopt==0)
+     fprintf(stdout,"empty namelist\n");
+   else
+     for (int i=0;i<nopt;i++) 
+       printf("%s %s\n",param[i],value[i]);
+ }
 
