@@ -27,6 +27,8 @@ char namefile[STRLEN]="";
 int nopt = 0;
 char ** param = NULL;
 char ** value = NULL;
+int lookfor(char parname[STRLEN]);
+int read_file(char input[], char filename[], char funcname[], char dirname[], char parname[]);
 
 /* list of obs */
 struct obs ** lobs = NULL ;
@@ -193,7 +195,7 @@ void load_allobs() {
   srand(300);
 #endif 
 
-if (lobs == NULL || nobs == 0) {
+  if (lobs == NULL || nobs == 0) {
     fprintf(stderr,"load_allobs : no obs loaded");
     return;
   }
@@ -223,6 +225,8 @@ void load_bck() {
 #ifdef DEBUG_RAND
   srand(200);
 #endif
+
+
   char *opt[]={"outoebx","Hfil","1","1"};
   //1 save state
   int ix,iy;
@@ -480,9 +484,20 @@ void read_lobs(int argc, char *argv[]){
 
   FILE * fid;
   int status, x,y,t;
-  fid = fopen(argv[1],"r");
+  char filename[STRLEN];
+  if (argc==1) {
+    fprintf(stderr,"read_lobs: Incomplete call read_lobs filename/auto\n");
+    return;
+    }
+   
+    status=read_file(argv[1],filename,"read_lobs","indir","obsfile");
+    if (status!=0)
+      return;
+
+   fid = fopen(filename,"r");
+ 
   if (fid == NULL) {
-    fprintf(stderr,"read_lobs: file %s not found\n",argv[1]);
+    fprintf(stderr,"read_lobs: file %s not found\n",filename);
     return;
   }
   char line[128];
@@ -520,7 +535,19 @@ void read_lobs(int argc, char *argv[]){
 
 void xsave_obs(int argc, char *argv[]) {
   FILE *fid;
-  fid=fopen(argv[1],"w");
+  int status;
+  char filename[STRLEN];
+ if (argc==1) {
+    fprintf(stderr,"xsave_obs: Incomplete call \n");
+    return;
+    }
+   
+    status=read_file(argv[1],filename,"xsave_obs","outdir","out_obs");
+    if (status!=0)
+      return;
+
+
+  fid=fopen(filename,"w");
   for (int i=0;i<nobs;i++) {
     fprintf(fid,"%d %d %d %g\n",lobs[i]->X,lobs[i]->Y,lobs[i]->T,lobs[i]->val);
   }
@@ -528,51 +555,69 @@ void xsave_obs(int argc, char *argv[]) {
 
 }
 
+
+
+
 void xivg(int argc,char *argv[]){
-	double val;
-	val = atof(argv[2]);
-			
-	if       (strcmp(argv[1], "dt") == 0) dedt=val;
-	else if  (strcmp(argv[1], "dx") == 0) dx=val;
-	else if  (strcmp(argv[1], "dy") == 0) { 
-	  dy=val;
-	  cor_computed=0;
-	  flag_cor=flag_cor-flag_cor%2 + 1 ;
-	}
-
-	else if  (strcmp(argv[1], "pcor") == 0) {
-	  pcor=val;
-	  cor_computed=0;
-
-	  flag_cor=4*(flag_cor/4)+(flag_cor%2) + 2;
-	}
-	else if  (strcmp(argv[1], "grav") == 0) grav=val;
-	else if  (strcmp(argv[1], "dissip") == 0) 
-	  {
-	    dissip=val;
+  double val;
+  if (!strcmp(argv[2],"auto")) {
+    int ipar;
+    char parname[STRLEN];
+    if (argc==4)
+      sprintf(parname,"%s",argv[3]);
+    else
+      sprintf(parname,"%s",argv[1]);
+    ipar = lookfor(parname);
+    if (ipar == -1) {
+      fprintf(stderr,"xivg: %s not found in namelist\n",parname);
+      return;
+    }
+    val = atof(value[ipar]);
+  }
+  else
+    val = atof(argv[2]);
+  
+  if       (strcmp(argv[1], "dt") == 0) dedt=val;
+  else if  (strcmp(argv[1], "dx") == 0) dx=val;
+  else if  (strcmp(argv[1], "dy") == 0) { 
+    dy=val;
+    cor_computed=0;
+    flag_cor=flag_cor-flag_cor%2 + 1 ;
+  }
+  
+  else if  (strcmp(argv[1], "pcor") == 0) {
+    pcor=val;
+    cor_computed=0;
+    
+    flag_cor=4*(flag_cor/4)+(flag_cor%2) + 2;
+  }
+  else if  (strcmp(argv[1], "grav") == 0) grav=val;
+  else if  (strcmp(argv[1], "dissip") == 0) 
+    {
+      dissip=val;
 #ifdef DISSIP0
-	    dissip0 = 0 ;
-	    fprintf(stdout," dissipiation neglected in balance term\n");
+      dissip0 = 0 ;
+      fprintf(stdout," dissipiation neglected in balance term\n");
 #else
-	    dissip0 = dissip ;
+      dissip0 = dissip ;
 #endif
-	  }
-	    
-	else if  (strcmp(argv[1], "hmoy") == 0) hmoy=val;
-	else if  (strcmp(argv[1], "alpha") == 0) alpha=val;
-	else if  (strcmp(argv[1], "rho0") == 0) rho0=val;
-	else if  (strcmp(argv[1], "nu") == 0) nu=val;
-	else if  (strcmp(argv[1], "sigper") == 0) sigper = val;
-	else if  (strcmp(argv[1], "beta")== 0) {
-	  beta=val;
-	  cor_computed=0;
-	  
-	  flag_cor=(flag_cor%4)+4;
-	}
-	if (flag_cor==7 && cor_computed==0) {
-	  init_coriolis() ;
-	  cor_computed=1;
-	}
+    }
+  
+  else if  (strcmp(argv[1], "hmoy") == 0) hmoy=val;
+  else if  (strcmp(argv[1], "alpha") == 0) alpha=val;
+  else if  (strcmp(argv[1], "rho0") == 0) rho0=val;
+  else if  (strcmp(argv[1], "nu") == 0) nu=val;
+  else if  (strcmp(argv[1], "sigper") == 0) sigper = val;
+  else if  (strcmp(argv[1], "beta")== 0) {
+    beta=val;
+    cor_computed=0;
+    
+    flag_cor=(flag_cor%4)+4;
+  }
+  if (flag_cor==7 && cor_computed==0) {
+    init_coriolis() ;
+    cor_computed=1;
+  }
 }
 
 void savestate() {
@@ -848,18 +893,28 @@ int ncinit() {
 }
 
 void xsavenc(int argc, char *argv[]) {
-  int it=-1;
-  if (argc !=3 && argc!=4) {
-    fprintf(stderr,"xsavegradnc : wrong number of arguments");
+  int status,it=-1;
+  char filename[STRLEN];
+  if (argc !=3 && argc!=4 && argc!=5) {
+    fprintf(stderr,"xsavenc : wrong number of arguments\n");
     return;
   }
+  if (!strcmp(argv[1],"auto") && argc!=5) {
+    fprintf(stderr,"xsavenc : if auto is specified, the fourth arg should be the namelist field\n");
+    return;
+  }
+  status=read_file(argv[1],filename,"xsavenc","outdir",argv[4]);
+  if (status!=0)
+    return;
+  
   if (argc == 4)
     it = atoi(argv[3]);
-  if (!strcmp(argv[2],"grad") )
-    savenc(argv[1],Names,Units,Long_Names,grads,it);  
+  
+if (!strcmp(argv[2],"grad") )
+    savenc(filename,Names,Units,Long_Names,grads,it);  
   else {
     savestate();
-    savenc(argv[1],SNames,SUnits,SLong_Names,state,it);
+    savenc(filename,SNames,SUnits,SLong_Names,state,it);
   }
 }
 void xperturb(int argc, char *argv[]) {
@@ -891,12 +946,20 @@ void xload_init(int argc, char *argv[]) {
   // argv[1] filename
   // argv[2] "std" for standard load "incr" to load the linward
   YREAL data[SZY][SZX];
-  int std = 1;
+  int status,std = 1;
+  char filename[STRLEN];
+ if (argc==1) {
+    fprintf(stderr,"xload_init: Incomplete call xload_init filename/auto [std(default)/incr]\n");
+    return;
+    }
   if (argc > 2) 
     std = strcmp(argv[2],"incr") ;
   
-  int ix,iy;
-  readnc(argv[1],"Hfil",data,0);
+  int ix,iy;  
+  status=read_file(argv[1],filename,"xload_init","indir","bck_state");
+  if (status!=0)
+    return;
+  readnc(filename,"Hfil",data,0);
   for (ix=0;ix<YA1_Soce;ix++)
     for (iy=0;iy<YA2_Soce;iy++) 
       if (std)
@@ -904,14 +967,14 @@ void xload_init(int argc, char *argv[]) {
       else
 	YG_Hfil(0,ix,iy,0) = data[iy][ix] - YS_Hfil(0,ix,iy,0);
   
-  readnc(argv[1],"Ufil",data,0);
+  readnc(filename,"Ufil",data,0);
   for (ix=0;ix<YA1_Soce;ix++)
     for (iy=0;iy<YA2_Soce;iy++) 
       if (std)
 	YS_Ufil(0,ix,iy,0) = data[iy][ix];
       else
 	YG_Ufil(0,ix,iy,0) = data[iy][ix] - YS_Ufil(0,ix,iy,0);
-  readnc(argv[1],"Vfil",data,0);
+  readnc(filename,"Vfil",data,0);
   for (ix=0;ix<YA1_Soce;ix++)
     for (iy=0;iy<YA2_Soce;iy++) 
       if (std)
@@ -1132,3 +1195,37 @@ int xread_namelist(int argc, char* argv[]) {
        printf("%s %s\n",param[i],value[i]);
  }
 
+int lookfor(char parname[STRLEN]) {
+  int ipar = -1 ;
+  for (int i=0 ; i<nopt;i++)
+    if (!strcmp(param[i],parname)) {
+      ipar = i;
+      break;
+    }
+  return(ipar);
+}
+
+int read_file(char input[], char filename[], char funcname[], char dirname[], char parname[]) {
+  /* Function called by read_lobs/xsavenc or xsaveobs (funcname)
+     if input (generally argv[1]) is "auto" look for information in namelist
+     return 0 for success, 1 is problem
+  */
+  if (strcmp(input,"auto")) {
+    sprintf(filename,"%s",input);
+    return(0);
+  }
+  else {
+    int ipar = lookfor(parname);
+    if (ipar == -1) {
+      fprintf(stderr,"%s: file not specified (%s not specified in namelist)\n",funcname,parname);
+      return(1);
+    }
+    int idir = lookfor(dirname);
+    if (idir == -1) {
+      fprintf(stderr,"%s: %s not specified in namelist\n",funcname,dirname);
+      return(1);
+    }
+     sprintf(filename,"%s/%s",value[idir],value[ipar]);
+     return(0);
+  } //else
+}

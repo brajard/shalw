@@ -18,8 +18,8 @@ exefile = os.path.join(os.path.abspath(bindir), exname)
 #global parameters
 
 yao_opt = {
-'compile':'True', 
-'gen_opt':'-p +O3 -x '+exefile,
+'compile':True, 
+'gen_opt':'-p  -x '+exefile,
 'forw': os.path.join(scriptdir,'forw.i')
 }
 
