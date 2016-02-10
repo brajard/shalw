@@ -20,8 +20,9 @@ exp_name = '00'
 expdir = os.path.join(datadir,'EXP' + exp_name)
 
 yao_opt = {
-'compile':'True', 
-'gen_opt':'-x '+exefile,
+
+'compile':True, 
+'gen_opt':'  -x '+exefile,
 'forw': os.path.join(scriptdir,'forw.i')
 }
 
