@@ -73,8 +73,8 @@ char SUnits[NVARS][STRLEN]={"meters","m/s","m/s","meters","m/s","m/s"};
 #define SELDON_DEBUG_LEVEL_4
 #define SELDON_WITH_LAPACK
 
-//#include "/usr/home/jbrlod/usr/seldon-5.2/Seldon.hxx"
-#include "/home/ROCQ/clime/jbrajard/project/verdandi/verdandi-1.6.1/include/seldon/Seldon.hxx"
+#include "/usr/home/jbrlod/usr/seldon-5.2/Seldon.hxx"
+//#include "/home/ROCQ/clime/jbrajard/project/verdandi/verdandi-1.6.1/include/seldon/Seldon.hxx"
 
 using namespace Seldon;
 typedef double Real_wp;

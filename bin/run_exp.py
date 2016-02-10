@@ -11,7 +11,7 @@ cdir = os.getcwd()
 datadir =  os.path.abspath(os.path.join (bindir, "../data"))
 scriptdir =  os.path.abspath(os.path.join (bindir, "../scripts"))
 sys.path.append(srcdir)
-from mytools import makedirs_sure, silentremove, make_namelist
+from mytools import makedirs_sure, silentremove, make_namelist, make_error_coef
 exname = 'shalw'
 exefile = os.path.join(os.path.abspath(bindir), exname)
 
@@ -66,9 +66,10 @@ if yao_opt['compile']:
         shell=True)
 
 
-#GENERATION OF NAMELIS
+#GENERATION OF NAMELIST
 namefile = os.path.join(indir,"namelist")
 make_namelist(namefile,namelist)
+make_error_coef(indir,namelist)
 
 #EXECUTE THE PROJECT
 if os.path.isfile(exefile):
