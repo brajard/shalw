@@ -12,7 +12,7 @@
 #include <netcdf.h>
 
 /* Dim max des strings */
-#define STRLEN 100
+#define STRLEN 200
 
 /* Observation structure */
 struct obs {
@@ -42,8 +42,8 @@ int nobs ;
 
 /* Name of variables */
 #define NVARS 6
-char SNames[NVARS][100]={"Hfil","Ufil","Vfil","Hphy","Uphy","Vphy"};
-char Names[NVARS][100]={"dHfil","dUfil","dVfil","dHphy","dUphy","dVphy"};
+char SNames[NVARS][STRLEN]={"Hfil","Ufil","Vfil","Hphy","Uphy","Vphy"};
+char Names[NVARS][STRLEN]={"dHfil","dUfil","dVfil","dHphy","dUphy","dVphy"};
 
 /* Units attributes */
 char Long_Names[NVARS][STRLEN]={"Gradient J on Filtered_Height",
@@ -313,7 +313,7 @@ void compute_adjoint() {
     erase_lobs();
 
     //Trick to compute adjoint (should also work for non-linear models)
-    convol_obs(i,4);
+    convol_obs(i,2);
 
     //lobs[i]->val = YS_Hfil(0,lobs[i]->Y,lobs[i]->X,lobs[i]->T);
     //YS_Hfil(0,lobs[i]->Y,lobs[i]->X,lobs[i]->T)++;
@@ -959,6 +959,8 @@ void xload_init(int argc, char *argv[]) {
   status=read_file(argv[1],filename,"xload_init","indir","bck_state");
   if (status!=0)
     return;
+
+  fprintf(stdout,"initial state: %s\n",filename);
   readnc(filename,"Hfil",data,0);
   for (ix=0;ix<YA1_Soce;ix++)
     for (iy=0;iy<YA2_Soce;iy++) 
