@@ -32,7 +32,7 @@ int read_file(char input[], char filename[], char funcname[], char dirname[], ch
 
 /* list of obs */
 struct obs ** lobs = NULL ;
-int nobs ;
+int nobs, initobs=0 ; //0 if obs not initialised in lobs
 /* Dimensions parameters */
 #define NDIMS 3
 #define Y_NAME "yaxis"
@@ -73,8 +73,8 @@ char SUnits[NVARS][STRLEN]={"meters","m/s","m/s","meters","m/s","m/s"};
 #define SELDON_DEBUG_LEVEL_4
 #define SELDON_WITH_LAPACK
 
-#include "/usr/home/jbrlod/usr/seldon-5.2/Seldon.hxx"
-//#include "/home/ROCQ/clime/jbrajard/project/verdandi/verdandi-1.6.1/include/seldon/Seldon.hxx"
+//#include "/usr/home/jbrlod/usr/seldon-5.2/Seldon.hxx"
+#include "/home/ROCQ/clime/jbrajard/project/verdandi/verdandi-1.6.1/include/seldon/Seldon.hxx"
 
 using namespace Seldon;
 typedef double Real_wp;
@@ -203,18 +203,23 @@ void load_allobs() {
  //First erase all obs
  erase_lobs();
 
- //Compute the model
- Yset_modeltime(0);
- before_it(1);
- //printf("---forward(i=%d)---\n",i);
- Yforward(-1, 0);
+ if (initobs == 0) {
+   //Compute the model if obs
+   Yset_modeltime(0);
+   before_it(1);
+   //printf("---forward(i=%d)---\n",i);
+   Yforward(-1, 0);
+ }
  fprintf(stdout,"Perturbation appliquée : %g\n",sigper);
  for (int i = 0 ; i < nobs ; i++) {
-   lobs[i]->val = YS_Hfil(0,lobs[i]->X,lobs[i]->Y,lobs[i]->T);
+   if (initobs==0) {
+     lobs[i]->val = YS_Hfil(0,lobs[i]->X,lobs[i]->Y,lobs[i]->T);
+   }
    lobs[i]->val += randn(0,sigper);
    Yobs_insert_data("Hfil",0,lobs[i]->X,lobs[i]->Y,0,lobs[i]->T,lobs[i]->val);
  }
  after_it(1);
+ initobs = 1;
  Yset_modeltime(0);
 
 }

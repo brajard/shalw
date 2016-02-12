@@ -90,7 +90,10 @@ make_error_coef(indir,namelist)
 #EXECUTE THE PROJECT
 if os.path.isfile(exefile):
     
-    strcmd = [exefile + ' namelist ' + namefile + ' -i ' + yao_opt["forw"] ]
+    strcmd = ['cd ' + indir + ' ; ' +
+              exefile + ' namelist ' + 
+              namefile + ' -i ' + yao_opt["forw"] + 
+              ' ; cd ' + cdir]
     print strcmd
     sp.call(
         strcmd,
