@@ -34,11 +34,13 @@ def make_namelist(filename,namelist):
 
 def make_error_coef(indir,namelist):
     f = open(os.path.join(indir,"bcoef.i"),'w')
-    bcoef = 1.0/(float(namelist["bckper"])**2)
-    f.write('set_bcoef Hfil ' + str(bcoef) + '\n')
+    if float(namelist['bckper'])>0:
+        bcoef = 1.0/(float(namelist["bckper"])**2)
+        f.write('set_bcoef Hfil ' + str(bcoef) + '\n')
     f.close()
     f = open(os.path.join(indir,"scoef.i"),'w')
-    scoef = 1.0/(float(namelist["obsper"])**2)
-    f.write('set_scoef Hfil ' + str(scoef) + '\n')
+    if float(namelist['obsper'])>0:
+        scoef = 1.0/(float(namelist["obsper"])**2)
+        f.write('set_scoef Hfil ' + str(scoef) + '\n')
     f.close()
     
