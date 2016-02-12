@@ -21,3 +21,5 @@ namelist = {
 'obsper':'1',
 'bckper':'10',
 }
+
+yao_opt['gen_opt']='+O3 -p'

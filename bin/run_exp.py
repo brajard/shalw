@@ -3,6 +3,8 @@
 import subprocess as sp
 import os
 import sys
+import importlib
+import getopt
 
 #Init des paths
 bindir = os.path.dirname(__file__)
@@ -11,12 +13,39 @@ cdir = os.getcwd()
 datadir =  os.path.abspath(os.path.join (bindir, "../data"))
 scriptdir =  os.path.abspath(os.path.join (bindir, "../scripts"))
 sys.path.append(srcdir)
-from mytools import makedirs_sure, silentremove, make_namelist, make_error_coef
+sys.path.append(scriptdir)
+from mytools import makedirs_sure, silentremove, make_namelist, make_error_coef, run_usage
 exname = 'shalw'
 exefile = os.path.join(os.path.abspath(bindir), exname)
 
 
-from config_renorm import exp_name,yao_opt,namelist
+
+
+## Input args
+configfile = 'config'
+
+try:
+    opts,args = getopt.getopt(sys.argv[1:],"hc:",["help","config="])
+except getopt.GetoptError:
+    run_usage()
+    sys.exit(2)
+
+for opt,arg in opts:
+    if opt in ("-h","--help"):
+        run_usage()
+        sys.exit()
+    elif opt in  ("-c","--config"):
+        configfile = arg
+
+
+print "config file used : "+configfile
+
+mconf = importlib.import_module(configfile)
+exp_name = mconf.exp_name
+yao_opt = mconf.yao_opt
+namelist = mconf.namelist
+#from config_renorm import exp_name,yao_opt,namelist
+
 
 expdir = os.path.join(datadir,'EXP' + exp_name)
 yao_opt['forw']=os.path.join(scriptdir,yao_opt['forw'])

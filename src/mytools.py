@@ -43,4 +43,12 @@ def make_error_coef(indir,namelist):
         scoef = 1.0/(float(namelist["obsper"])**2)
         f.write('set_scoef Hfil ' + str(scoef) + '\n')
     f.close()
-    
+
+def run_usage():
+    print "\nrun_exp.py [OPTIONS]\n"
+    print "run_exp.py run a assimilation experiment on shallow-water"
+    print "\nOPTIONS"
+    print "\t -h, --help"
+    print "\t print this help message and exit\n"
+    print "\t -c [FILENAME] --config=[FILENAME]"
+    print "\t use the file specified in [FILENAME] as configuration file (default is 'config')\n"
