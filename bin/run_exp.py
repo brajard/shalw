@@ -15,27 +15,14 @@ from mytools import makedirs_sure, silentremove, make_namelist, make_error_coef
 exname = 'shalw'
 exefile = os.path.join(os.path.abspath(bindir), exname)
 
-#global parameters
-exp_name = '00'
+
+from config_renorm import exp_name,yao_opt,namelist
+
 expdir = os.path.join(datadir,'EXP' + exp_name)
-
-yao_opt = {
-
-'compile':True, 
-'gen_opt':'  -x '+exefile,
-'forw': os.path.join(scriptdir,'forw.i')
-}
-
-namelist = {
-'indir':os.path.join(expdir,"input"),
-'outdir':os.path.join(expdir,"output"),
-'obsfile':'obs.dat',
-'bck_state':'snapshot_10.nc',
-'out_true':'state_true.nc',
-'out_obs':'obs_per.dat',
-'obsper':'1',
-'bckper':'10',
-}
+yao_opt['forw']=os.path.join(scriptdir,yao_opt['forw'])
+yao_opt['gen_opt']=yao_opt['gen_opt']+' -x ' + exefile
+namelist['indir']=os.path.join(expdir,namelist['indir'])
+namelist['outdir']=os.path.join(expdir,namelist['outdir'])
 
 
 
