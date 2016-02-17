@@ -32,6 +32,7 @@ load_bck
 set_modeltime 0
 forward
 xsavenc auto state -1 out_true
+xsavenc auto state 0 out_init
 
 xivg sigper auto obsper
 load_allobs

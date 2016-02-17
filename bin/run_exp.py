@@ -18,17 +18,23 @@ from mytools import makedirs_sure, silentremove, make_namelist, make_error_coef,
 exname = 'shalw'
 exefile = os.path.join(os.path.abspath(bindir), exname)
 
+tocompile = True
+
 
 
 
 ## Input args
-configfile = 'config'
+configfile = 'Config_forw'
 
 try:
-    opts,args = getopt.getopt(sys.argv[1:],"hc:",["help","config="])
+    opts,args = getopt.getopt(sys.argv[1:],"hc:",["help","config=","exp=","suff=","no-compile"])
 except getopt.GetoptError:
     run_usage()
     sys.exit(2)
+
+exp_name = '02'
+suff = ''
+tocompile = True
 
 for opt,arg in opts:
     if opt in ("-h","--help"):
@@ -36,14 +42,24 @@ for opt,arg in opts:
         sys.exit()
     elif opt in  ("-c","--config"):
         configfile = arg
+    elif opt in ("--exp"):
+        exp_name = arg
+    elif opt in ("--suff"):
+        suff = arg
+    elif opt in ("--no-compile"):
+        tocompile = False
 
 
-print "config file used : "+configfile
+print "config class used : "+configfile
 
-mconf = importlib.import_module(configfile)
-exp_name = mconf.exp_name
-yao_opt = mconf.yao_opt
-namelist = mconf.namelist
+cfg = importlib.import_module('config')
+strclass = "cfg." + configfile + "(exp_name,suff,tocompile)"
+conf = eval(strclass)
+exp_name = conf.exp_name
+namelist= conf.namelist
+yao_opt = conf.yao_opt
+
+
 #from config_renorm import exp_name,yao_opt,namelist
 
 

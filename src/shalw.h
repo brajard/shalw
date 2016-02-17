@@ -499,11 +499,12 @@ void read_lobs(int argc, char *argv[]){
     status=read_file(argv[1],filename,"read_lobs","indir","obsfile");
     if (status!=0)
       return;
-    if (argc==3 & !strcmp(argv[2],"val"))
+    if (argc>=3 & !strcmp(argv[2],"val"))
       initobs = 1;
 
    fid = fopen(filename,"r");
- 
+   fprintf(stdout,"read file %s\n",filename);
+
   if (fid == NULL) {
     fprintf(stderr,"read_lobs: file %s not found\n",filename);
     return;
@@ -516,7 +517,8 @@ void read_lobs(int argc, char *argv[]){
   lobs = (struct obs**)malloc(nobs * sizeof(struct obs*));
   for (int i=0;i<nobs;i++) {
     if (initobs==1) {
-      status = fscanf(fid,"%d %d %d %f",&x,&y,&t,&val);
+      status = fscanf(fid,"%d %d %d %lf",&x,&y,&t,&val);
+
       if (status !=4) {
 	fprintf(stderr,"Unable to read obs #%d\n",i);
 	break;
@@ -567,6 +569,7 @@ void xsave_obs(int argc, char *argv[]) {
 
 
   fid=fopen(filename,"w");
+  fprintf(fid,"#%d\n",nobs);
   for (int i=0;i<nobs;i++) {
     fprintf(fid,"%d %d %d %g\n",lobs[i]->X,lobs[i]->Y,lobs[i]->T,lobs[i]->val);
   }
@@ -926,7 +929,7 @@ void xsavenc(int argc, char *argv[]) {
   if (status!=0)
     return;
   
-  if (argc == 4)
+  if (argc >= 4)
     it = atoi(argv[3]);
   
 if (!strcmp(argv[2],"grad") )

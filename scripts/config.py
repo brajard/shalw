@@ -1,25 +1,35 @@
-#global parameters
-exp_name = '00'
+class Config:
+    def __init__(self,exp_name,tocompile):
+        self.exp_name=exp_name
+        self.yao_opt = {
+            'compile':tocompile, 
+            'gen_opt':'+O3 -p'}
+        self.namelist = {
+            'indir':'input',
+            'outdir':'output',
+            'obsfile':'obs.dat',
+            'obsper':'1',
+            'bckper':'10',
+            }
 
-yao_opt = {
 
-'compile':True, 
-'gen_opt':''             ,
-#'forw': os.path.join(scriptdir,'forw.i')
-'forw':'forw.i'
-}
-
-namelist = {
-#indir':os.path.join(expdir,"input"),
-#outdir':os.path.join(expdir,"output"),
-'indir':'input',
-'outdir':'output',
-'obsfile':'obs.dat',
-'bck_state':'snapshot_10.nc',
-'out_true':'state_true.nc',
-'out_obs':'obs_per.dat',
-'obsper':'1',
-'bckper':'10',
-}
-
-yao_opt['gen_opt']='+O3 -p'
+class Config_forw (Config):
+    def __init__ (self,exp_name='02',suff='',tocompile=True):
+        Config.__init__(self,exp_name,tocompile)
+        self.yao_opt['forw']='forw.i'
+        self.namelist['out_true']='state_true_' + suff + '.nc'
+        self.namelist['out_obs']='obs_per_' + suff + '.dat'
+        self.namelist['out_init']='snapshot_bck_' + suff + '.nc'
+        self.namelist['bck_state']='snapshot_10.nc'
+        
+class Config_var (Config):
+    def __init__ (self,exp_name='02',suff='',tocompile=True):
+        Config.__init__(self,exp_name,tocompile)
+        self.yao_opt['forw']='assim.i'
+        self.namelist['indir']='output'
+        self.namelist['obsfile']='obs_per_0.dat'
+        self.namelist['bck_state']='snapshot_bck_0.nc'
+        self.namelist['out_true']='state_true_' + suff + '.nc'
+        self.namelist['out_bck']='state_bck_' + suff + '.nc'
+        self.namelist['out_ret']='state_ret_' + suff + '.nc'
+        self.namelist['out_obs']='obs_per_' + suff + '.dat'
