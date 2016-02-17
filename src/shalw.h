@@ -489,6 +489,7 @@ void read_lobs(int argc, char *argv[]){
 
   FILE * fid;
   int status, x,y,t;
+  YREAL val;
   char filename[STRLEN];
   if (argc==1) {
     fprintf(stderr,"read_lobs: Incomplete call read_lobs filename/auto\n");
@@ -498,6 +499,8 @@ void read_lobs(int argc, char *argv[]){
     status=read_file(argv[1],filename,"read_lobs","indir","obsfile");
     if (status!=0)
       return;
+    if (argc==3 & !strcmp(argv[2],"val"))
+      initobs = 1;
 
    fid = fopen(filename,"r");
  
@@ -512,16 +515,27 @@ void read_lobs(int argc, char *argv[]){
   
   lobs = (struct obs**)malloc(nobs * sizeof(struct obs*));
   for (int i=0;i<nobs;i++) {
-    status = fscanf(fid,"%d %d %d",&x,&y,&t);
-    if (status != 3) {
-      fprintf(stderr,"Unable to read obs #%d\n",i);
-      break;
+    if (initobs==1) {
+      status = fscanf(fid,"%d %d %d %f",&x,&y,&t,&val);
+      if (status !=4) {
+	fprintf(stderr,"Unable to read obs #%d\n",i);
+	break;
+      }
+    }
+    else {
+      
+      status = fscanf(fid,"%d %d %d",&x,&y,&t);
+      if (status != 3) {
+	fprintf(stderr,"Unable to read obs #%d\n",i);
+	break;
+      }
+      val = NAN;
     }
     lobs[i] = (struct obs*)malloc(sizeof(struct obs));
     lobs[i] -> X = x;
     lobs[i] -> Y = y;
     lobs[i] -> T = t;
-    lobs[i] -> val = NAN;
+    lobs[i] -> val = val;
 
   }
   if (nobs<10)

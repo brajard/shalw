@@ -21,7 +21,7 @@ set_modeltime 0
 xread_namelist
 print_namelist
 
-read_lobs auto
+read_lobs auto val
 xload_init auto
 
 
