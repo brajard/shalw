@@ -99,7 +99,7 @@ if yao_opt['compile']:
 
 
 #GENERATION OF NAMELIST
-namefile = os.path.join(indir,"namelist")
+namefile = os.path.join(indir,conf.namefile)
 make_namelist(namefile,namelist)
 make_error_coef(indir,namelist)
 
