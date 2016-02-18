@@ -26,14 +26,17 @@ read_lobs auto
 xload_init auto
 
 set_balanced true
-xivg sigper auto bckper
-load_bck
 
 set_modeltime 0
 forward
 xsavenc auto state -1 out_true
+load_allobs
+xsave_obs auto
+
+xivg sigper auto bckper
+load_bck
+
 xsavenc auto state 0 out_init
 
 xivg sigper auto obsper
-load_allobs
-xsave_obs auto
+
