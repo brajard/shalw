@@ -1,6 +1,6 @@
 //#define GEOSTROPHY
 
-#define RENORM
+//#define RENORM
 #define USE_NETCDF
 // Neglect dissipation in init term
 //#define DISSIP0 
@@ -74,8 +74,8 @@ char SUnits[NVARS][STRLEN]={"meters","m/s","m/s","meters","m/s","m/s"};
 #define SELDON_WITH_LAPACK
 
 //#include "/usr/home/jbrlod/usr/seldon-5.2/Seldon.hxx"
-#include "/home/ROCQ/clime/jbrajard/project/verdandi/verdandi-1.6.1/include/seldon/Seldon.hxx"
-
+//#include "/home/ROCQ/clime/jbrajard/project/verdandi/verdandi-1.6.1/include/seldon/Seldon.hxx"
+#include "/home/jbrajard/usr/include/seldon-5.2/Seldon.hxx"
 using namespace Seldon;
 typedef double Real_wp;
 
@@ -132,7 +132,9 @@ void appli_start(int argc, char *argv[]){
 #ifdef USE_NETCDF
   // ncinit();
 #endif
+#ifdef RENORM
   test_seldon();
+#endif
 
   if (argc>=3 && !strcmp(argv[1],"namelist")) {
       strcpy(namefile,argv[2]);
@@ -332,7 +334,9 @@ void compute_adjoint() {
     
     Ybackward (-1, 0); // Ybackward (YNBSTEPTIME);/* AD (adjoint):-> d*x =M*(X).dX : Yjac * YG -> Ytbeta */
     after_it(1);
+#ifdef RENORM
     get_adjoint(i);
+#endif
   } //for i
   savestate();
 }
@@ -465,8 +469,14 @@ void xgauss(int argc, char *argv[]){
 }
 
 void xset_maxiter(int argc, char *argv[]) {
+#ifdef RENORM
     maxiter = atoi(argv[1]);
+#else
+    fprintf(stderr,"Renormalization not activated, you should not use xset_maxiter");
+
   }
+#endif
+
 void xvitgeo(){
 	double gf, gfh;
 #ifdef GEOSTROPHY
@@ -499,7 +509,7 @@ void read_lobs(int argc, char *argv[]){
     status=read_file(argv[1],filename,"read_lobs","indir","obsfile");
     if (status!=0)
       return;
-    if (argc>=3 & !strcmp(argv[2],"val"))
+    if ( (argc>=3) & !strcmp(argv[2],"val"))
       initobs = 1;
 
    fid = fopen(filename,"r");
@@ -1112,7 +1122,7 @@ int savenc(char filename[],char Names[NVARS][STRLEN],
 int readnc (char filename[],char Name[STRLEN],YREAL data[SZY][SZX], int it0) {
   int retval,ncid, data_id;
   size_t start[NDIMS], count[NDIMS];
-  int it;
+  // int it;
   
   //Open file
    if ((retval = nc_open(filename, NC_NOWRITE, &ncid)))
@@ -1120,7 +1130,7 @@ int readnc (char filename[],char Name[STRLEN],YREAL data[SZY][SZX], int it0) {
 
    //Get varids
     if ((retval = nc_inq_varid(ncid, Name, &data_id)))
-      ERR(retval);
+      ERRNC(retval);
     count[0]=1;
    count[1]=SZY;
    count[2]=SZX;
@@ -1131,12 +1141,12 @@ int readnc (char filename[],char Name[STRLEN],YREAL data[SZY][SZX], int it0) {
      start[0]=it0;
      if ((retval = nc_get_vara_double(ncid, data_id, start, 
 				     count, &data[0][0])))
-       	 ERR(retval);
+       	 ERRNC(retval);
      // }
    
    
    if ((retval = nc_close(ncid)))
-     ERR(retval);
+     ERRNC(retval);
    return(0);
 }
 #endif

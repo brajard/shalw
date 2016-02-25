@@ -11,7 +11,7 @@ defval SZA 1462
 hat_name "shalw.h" "renorm.h" 
 
 //option o_gradtest
-option o_parallel
+//option o_parallel
 option o_m1qn3 
 //option o_dbg_nanf
 option o_varincr
