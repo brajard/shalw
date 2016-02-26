@@ -1,3 +1,4 @@
+#ifdef RENORM
 void compute_Hinv(Matrix<YREAL,Symmetric, RowSymPacked>& Hinv,const Vector<YREAL>& phi, Matrix<YREAL>& Radj, Matrix<YREAL>& Rphi);
 void compute_Conv (Vector <YREAL> &Conv, Matrix<YREAL,Symmetric, RowSymPacked>& Hinv, Vector <YREAL> &phi,  Matrix<YREAL>& Rphi);
 void compute_minmax(YREAL *pconv_min, YREAL *pconv_max, Vector <YREAL> &Conv);
@@ -269,3 +270,8 @@ void compute_Hinv (Matrix<YREAL,Symmetric, RowSymPacked>& Hinv,const Vector<YREA
   
 }
 
+#else
+void renorm(){}
+void set_sol(){}
+
+#endif
