@@ -132,6 +132,9 @@ void appli_start(int argc, char *argv[]){
 #ifdef USE_NETCDF
   // ncinit();
 #endif
+
+  srand(getpid());
+
 #ifdef RENORM
   test_seldon();
 #endif
