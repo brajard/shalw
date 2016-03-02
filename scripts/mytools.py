@@ -52,3 +52,7 @@ def run_usage():
     print "\t print this help message and exit\n"
     print "\t -c [FILENAME] --config=[FILENAME]"
     print "\t use the file specified in [FILENAME] as configuration file (default is 'config')\n"
+    print "\t --suff=[SUFFIXE]"
+    print "\t suffix of all output files (default is '')\n"
+    print "\t --no-compile"
+    print "\t the source code is not compiled and the executable (bin/shalw) is used (bu default, the source is recompiled\n"
