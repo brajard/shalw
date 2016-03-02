@@ -16,3 +16,4 @@ prof.txt
 *.png
 out*.txt
 *_tmp.*
+*.pyc
