@@ -1,20 +1,22 @@
 # shalw
 
-# INSTALL
+## INSTALL
 
-## Prerequesite
+### Prerequesite
 - optional : seldon with CBLAS/Lapack
 - python
 - yao
 
-# RUN
+## RUN
 
-## `bin/script_run_ensemble.py`
+### `bin/script_run_ensemble.py`
 this script run the all ensemble experiment. This script is made to be
 changed to adapt the experiment.
 
 called by : none
+
 call : `bin/run_exp.py`
+
 parameter set :
 - exp_name : name of the experiment (e.g. `02`) and directory where
 results are produced (e.g. `data/EXP02/`)
@@ -29,20 +31,21 @@ experiment
 - standard output : time of execution of the standard run and all the
 members run
 
-## `bin/run_exp.py`
+### `bin/run_exp.py`
 this script run an assimilation (or a reference) experiment. This
 script should not be changed to make standard runs.
 
-called by  : `bin/run_ensemble.py`
-call : `yao02`, `bin/shalw`, `scripts/config`, `make_namelist`, `make_error_coef`
+called by  : [`bin/run_ensemble.py`]
+
+call : `yao92`, `scripts/config`, `make_namelist`, `make_error_coef`, `bin/shalw`
 parameter set (`make ./run_exp.py -h` to see how to set parameters) :
 - config : set the configuration of the experiment through a class
 defined in config.py. The configuration is a class name.
 - suff : set the suffix of the name of the outputs of the files
 - no-compile : to avoid the compilation of the source.
 
-## `yao92`
-it is an external program (see install) used to generate and compile
+### `yao92`
+It is an external program (see install) used to generate and compile
 the source code to produce the executable bin/shalw.
 
 The source code is in the directory `src`.
@@ -53,14 +56,14 @@ point in y) and SZT (number of step times).
 - shalw.h : all the code needed in the model (other than numerical model)
 - *.h : all the code of the numerical model
 
-## `bin/shalw`
+### `bin/shalw`
 This is the executable to run one assimilation (or one assimilation
 experiment)
 
-## `script/config`
+### `script/config`
 
-## `make_namelist`
+### `make_namelist`
 
-## `make_error`
+### `make_error`
 
 
