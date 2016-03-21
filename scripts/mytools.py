@@ -7,8 +7,8 @@ def rankdiag(q,xtrue,xest):
     vret = np.zeros(len(q)-1)
     for i in range(0,len(q)-1):
         vret[i]=((v[i] <= xest) & (xest < v[i+1])).sum()
-    vret[0]+=(xest < v[0]).sum()
-    vret[-1]+=(v[-1] <= xest).sum()
+        vret[0]+=(xest < v[0]).sum()
+        vret[-1]+=(v[-1] <= xest).sum()
     return(vret)
 
 def makedirs_sure(path):
@@ -17,7 +17,7 @@ def makedirs_sure(path):
     except OSError as exception:
         if exception.errno != errno.EEXIST:
             raise
-
+        
 def silentremove(filename):
     try:
         os.remove(filename)
@@ -29,7 +29,8 @@ def silentremove(filename):
 def make_namelist(filename,namelist):
     f = open(filename,'w')
     for par,value in namelist.items():
-        f.write(par + ' ' + value + '\n')
+        if value is not None:
+            f.write(par + ' ' + value + '\n')
     f.close()
 
 def make_error_coef(indir,namelist):
@@ -56,3 +57,5 @@ def run_usage():
     print "\t suffix of all output files (default is '')\n"
     print "\t --no-compile"
     print "\t the source code is not compiled and the executable (bin/shalw) is used (bu default, the source is recompiled\n"
+    print "\t --nrun=[NRUN]"
+    print "\t (for free run only) number of sequential runs of the model\n"
