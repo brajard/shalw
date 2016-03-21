@@ -31,6 +31,10 @@ experiment
 - standard output : time of execution of the standard run and all the
 members run
 
+Example :
+- ./run_exp.py --exp=04 --config=Config_freerun --nrun=12
+  Run a one year (if number of step times is equivalent to a month) of free run from equilibrium state.
+
 ### `bin/run_exp.py`
 this script run an assimilation (or a reference) experiment. This
 script should not be changed to make standard runs.
