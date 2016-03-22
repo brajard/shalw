@@ -23,7 +23,7 @@ set_modeltime 0
 xread_namelist
 print_namelist
 
-set_balanced true
+set_balanced false
 
 load_inst loop.i
 
