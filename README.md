@@ -32,7 +32,8 @@ experiment
 members run
 
 Example :
-- ./run_exp.py --exp=04 --config=Config_freerun --nrun=12
+
+- `./run_exp.py --exp=04 --config=Config_freerun --nrun=12`
   Run a one year (if number of step times is equivalent to a month) of free run from equilibrium state.
 
 ### `bin/run_exp.py`
