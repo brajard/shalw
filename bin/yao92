@@ -138,7 +138,7 @@ EOF
   OECHO="0"
   OLIBFOR="-lgfortran"
   OPT_NEWSTRUCTURE="-n"  
-  
+  LBLAS=""
   if test $MACHINE = "darwin"
   then
     OLIBFOR="-L/sw/lib/gcc4.4/lib -lgfortran"
@@ -165,6 +165,7 @@ EOF
   > -e		  echo of the compilation and the link.
   > -lg2c	  the specification of the fortran library.
   > -p		  enable the parallelization (openMP must be installed on the machine).
+  > -blas         link with blas,cblas,lapack libraries
   > prjName	  is the project name.
 EOF
     exit;
@@ -248,6 +249,13 @@ EOF
     then
       OPT_NEWSTRUCTURE="-n"
     fi
+    
+  #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  #-----> blas library
+    if test $i = "-blas"
+    then
+      LBLAS="-lcblas -lblas -llapack"
+    fi
   
   
    #=====> Fin Boucle de traitement des Parametres
@@ -278,7 +286,7 @@ EOF
 #----> on demande juste de l'aide 
   if test $OHELP = "1"
   then
-    ${BINDIR}/Yao${VERS}Generator -h 
+    ${BINDIR}/yao${VERS}generator -h 
     exit
   fi
 
@@ -376,7 +384,8 @@ EOF
       fi
     fi
   fi
-
+  LDFLAGS="${LDFLAGS} ${LBLAS}"
+  
   #=======================================================================
   #biblioth�que MQNDIR (pour libreries M1QN3 et M2QN1)
   if test ${#MQNDIR} -eq 0
@@ -599,7 +608,8 @@ EOF
   then
     echo " ${CXX} ${CXXFLAGS} ${PARALLEL} -o $EXECNAME Ymain_$prj.o Y$prj.o ${LDMQN} ${LDYEXTOBJ} ${LDFLAGS}"
   fi
-  if ${CXX} ${CXXFLAGS} ${PARALLEL} -o $EXECNAME Ymain_$prj.o Y$prj.o ${LDMQN} ${LDYEXTOBJ} ${LDFLAGS} -lcblas -lblas -llapack
+  if ${CXX} ${CXXFLAGS} ${PARALLEL} -o $EXECNAME Ymain_$prj.o Y$prj.o ${LDMQN} ${LDYEXTOBJ} ${LDFLAGS} 
+#-lcblas -lblas -llapack
   then
     echo
     echo "       =======================  PROJECT IS NOW READY  ====================="
