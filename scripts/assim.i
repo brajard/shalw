@@ -31,7 +31,7 @@ set_balanced true
 
 set_modeltime 0
 forward
-xsavenc auto state -1 out_true
+#xsavenc auto state -1 out_true
 
 
 xdisplay
@@ -58,8 +58,8 @@ setm_impres 6
 setm_io 6
 setm_mode 0
 #set_nbiter 100
-set_nbiter 25
-setm_nsim 50
+set_nbiter 400
+setm_nsim 800
 set_nbextl 1
 #SET_PCOEF 0
 setm_dxmin 1.0e-8
