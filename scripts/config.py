@@ -5,7 +5,7 @@ class Config:
         self.exp_name=exp_name
         self.yao_opt = {
             'compile':tocompile, 
-            'gen_opt':'+O3 -p'}
+            'gen_opt':'+O3'}
         self.namelist = {
             'indir':'input',
             'outdir':'output',
@@ -25,6 +25,11 @@ class Config_forw (Config):
         self.namelist['out_init']='snapshot_bck_' + suff + '.nc'
         self.namelist['bck_state']='snapshot_10.nc'
         self.namelist['obsfile']='obs.dat'
+
+class Config_forw_nb (Config_forw):
+    def __init__ (self,exp_name='02',suff='',tocompile=True):
+        Config_forw.__init__(self,exp_name,suff,tocompile)
+        self.yao_opt['forw']='forw_nb.i'
 
 class Config_var (Config):
     def __init__ (self,exp_name='02',suff='',tocompile=True):
