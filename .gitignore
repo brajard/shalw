@@ -17,3 +17,5 @@ prof.txt
 out*.txt
 *_tmp.*
 *.pyc
+data/EXP*
+.ipynb*
