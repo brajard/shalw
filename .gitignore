@@ -19,3 +19,4 @@ out*.txt
 *.pyc
 data/EXP*
 .ipynb*
+bin/batchdir/batch_*.sh

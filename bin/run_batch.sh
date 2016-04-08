@@ -10,13 +10,13 @@ import importlib
 Nens = 30
 
 #Name of experiment
-exp_name = '03'
+exp_name = '02'
 
 bindir = os.path.dirname(__file__)
 exfile = 'run_exp.py'
 datadir =  os.path.abspath(os.path.join (bindir, "../data"))
 expdir = os.path.join(datadir,'EXP' + exp_name)
-
+batchdir = os.path.join(bindir,'batchdir')
 
 start = time.time()
 
@@ -46,7 +46,7 @@ proc=[]
 for i in range(Nens):
     logfile = os.path.join(expdir,'log_'+str(i+1)+'.out')
     optline = ' -c Config_var --no-compile --suff=' + str(i+1) + ' --exp='+exp_name
-    fname = 'batch_' + str(i+1) + '.sh'
+    fname = os.path.join(batchdir,'batch_' + str(i+1) + '.sh')
     qsubfile(os.path.abspath(os.path.join(bindir,exfile)) + ' ' + optline,fname,logfile)
     os.system('qsub '+fname)
     
