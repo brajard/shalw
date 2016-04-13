@@ -27,7 +27,7 @@ tocompile = True
 configfile = 'Config_forw'
 
 try:
-    opts,args = getopt.getopt(sys.argv[1:],"hc:",["help","config=","exp=","suff=","nrun=","no-compile"])
+    opts,args = getopt.getopt(sys.argv[1:],"hc:",["help","config=","exp=","suff=","nrun=","save_freq=","no-compile"])
 except getopt.GetoptError:
     run_usage()
     sys.exit(2)
@@ -36,6 +36,7 @@ exp_name = '02'
 suff = ''
 tocompile = True
 nrun = None
+save_freq=0
 
 for opt,arg in opts:
     if opt in ("-h","--help"):
@@ -51,7 +52,8 @@ for opt,arg in opts:
         tocompile = False
     elif opt in ("--nrun"):
         nrun = int(arg)
-
+    elif opt in ("--save_freq"):
+        save_freq=int(arg)
 
 print "config class used : "+configfile
 print "nrun="+str(nrun)
@@ -59,7 +61,7 @@ print "nrun="+str(nrun)
 cfg = importlib.import_module('config')
 strclass = "cfg." + configfile + "(exp_name,suff,tocompile)"
 if nrun is not None : #only for free model run
-    strclass = "cfg." + configfile + "(exp_name,suff,tocompile,nrun)"
+    strclass = "cfg." + configfile + "(exp_name,suff,tocompile,nrun,save_freq=save_freq)"
 conf = eval(strclass)
 exp_name = conf.exp_name
 namelist= conf.namelist

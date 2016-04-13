@@ -44,18 +44,20 @@ class Config_var (Config):
         self.namelist['out_obs']='obs_per_' + suff + '.dat'
 
 class Config_freerun (Config):
-    def __init__ (self,exp_name='04',suff='',tocompile=True,nrun=1,dfile = '../src/shalw.d',dt=1800):
+    def __init__ (self,exp_name='04',suff='',tocompile=True,nrun=1,dfile = '../src/shalw.d',dt=1800,save_freq=0):
         #nrun : number of integrated time
         Config.__init__(self,exp_name,tocompile,suff)
         self.indir = os.path.abspath(os.path.join('../data','EXP' + exp_name,self.namelist['indir']))
+        self.suff=suff
         self.yao_opt['forw']='spinup.i'
         self.namelist['bck_state']=None
         runtime = self.get_runtime(dfile)
+        self.runtime = runtime
         totaltime = self.get_totaltime(runtime,nrun,dt)
         self.namelist['out_true']='state_' + totaltime["str"] + '_' + suff + '.nc'
-        self.create_loop(nrun)
+        self.create_loop(nrun,save_freq)
 
-    def create_loop(self,nrun):
+    def create_loop(self,nrun,save_freq=0):
         print 'nrun=',str(nrun)
         file = open(os.path.join(self.indir,'loop.i'),'w')
         if self.namelist['bck_state'] is not None:
@@ -63,6 +65,9 @@ class Config_freerun (Config):
         for i in range(nrun):
             file.write('set_modeltime 0\n')
             file.write('forward\n')
+            if save_freq>0 and i%(save_freq)==0:
+                fname = os.path.join(self.indir,'..',self.namelist['outdir'],'state_' + str(i) + '_' + self.suff + '.nc')
+                file.write('xsavenc '+ os.path.abspath(fname) + ' state ' + str(self.runtime) + '\n')
             file.write('saveinit\n')
         file.close()
 
