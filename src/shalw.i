@@ -48,7 +48,7 @@ goto EXP_JUM
 
 FORW1
 xload_init snapshot_10.nc
-set_balanced famse
+set_balanced false
 set_modeltime 0
 forward
 xdisplay
