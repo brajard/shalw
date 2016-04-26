@@ -44,13 +44,15 @@ class Config_var (Config):
         self.namelist['out_obs']='obs_per_' + suff + '.dat'
 
 class Config_freerun (Config):
-    def __init__ (self,exp_name='04',suff='',tocompile=True,nrun=1,dfile = '../src/shalw.d',dt=1800,save_freq=0):
+    def __init__ (self,exp_name='04',suff='',tocompile=True,nrun=1,dfile = '../src/shalw.d',dt=1800,save_freq=0,bck=False):
         #nrun : number of integrated time
         Config.__init__(self,exp_name,tocompile,suff)
         self.indir = os.path.abspath(os.path.join('../data','EXP' + exp_name,self.namelist['indir']))
         self.suff=suff
         self.yao_opt['forw']='spinup.i'
         self.namelist['bck_state']=None
+	if bck :
+		self.namelist['bck_state']='snapshot_bck_0.nc'
         runtime = self.get_runtime(dfile)
         self.runtime = runtime
         totaltime = self.get_totaltime(runtime,nrun,dt)
