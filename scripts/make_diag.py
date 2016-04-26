@@ -4,7 +4,7 @@ sys.path.reverse() #look in anaconda paths first
 from netCDF4 import Dataset
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.stats import chisquare
+#from scipy.stats import chisquare
 
 
 
@@ -84,20 +84,22 @@ def reliability(xt,xa,thr,nbins=20,mask=None,oplot=True):
     
   
     if oplot:
-        plt.plot(xc,Np,'o--',color='gray')
-        plt.plot([0,1],[0,1],'b')
-        plt.plot(xc,obsf,'o-k')
-        plt.plot([0,1],[freq_tot]*2,':k')
+        f1,ax = plt.subplots(figsize=(10,5))
+        ax.plot(xc,Np,'o--',color='gray')
+        ax.plot([0,1],[0,1],'b')
+        ax.plot(xc,obsf,'o-k')
+        ax.plot([0,1],[freq_tot]*2,':k')
         #plt.savefig('/home/jbrajard/case-study/2016/fig_aves/2016_04_04/reliability0.png')
-        plt.xlabel('forecast probability')
-        plt.ylabel('observed frequency')
-        plt.show()
+        ax.set_xlabel('forecast probability')
+        ax.set_ylabel('observed frequency')
+        f1.savefig('reliability.png')
 
     return(obsf,xc,Np)
         
    
 
 def rank_diag(xt,xa,hinit=None,mask=None):
+    Nens = xa.shape[0]
     if hinit is None:
         hinit = np.zeros(Nens+1)
     if mask is None:
@@ -116,11 +118,16 @@ def rank_diag(xt,xa,hinit=None,mask=None):
         hinit[ind-1]+=1
     
     print 'chi2 test'
-    fstat,pvalue=chisquare(hinit)
-    print 'stat =',fstat,' ; pvalue = ' , pvalue
-    plt.bar(np.arange(Nens+1),hinit)
-    #plt.savefig('/home/jbrajard/case-study/2016/fig_aves/2016_04_04/rank0.png')
-    plt.show()
+#    fstat,pvalue=chisquare(hinit)
+ #   print 'stat =',fstat,' ; pvalue = ' , pvalue
+  #  plt.bar(np.arange(Nens+1),hinit)
+    f1,ax = plt.subplots(figsize=(10,5))
+    ax.bar(np.arange(Nens+1),hinit)
+    ax.plot([0,Nens+1],[float(N)/(Nens+1)]*2,'--r')
+    ax.set_xlabel('bins')
+    ax.set_ylabel('frequency')
+    plt.savefig('rank.png')
+#    plt.show()
 
     return(hinit)
 
