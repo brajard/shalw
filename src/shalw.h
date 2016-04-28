@@ -679,6 +679,9 @@ void saveinit() {
 	YS_Hfil(0,ix,iy,0) = YS_Hfil(0,ix,iy,YNBALLTIME_Toce-1);
 	YS_Ufil(0,ix,iy,0) = YS_Ufil(0,ix,iy,YNBALLTIME_Toce-1);
 	YS_Vfil(0,ix,iy,0) = YS_Vfil(0,ix,iy,YNBALLTIME_Toce-1);
+	YS_Hphy(0,ix,iy,0) = 0 ;
+	YS_Uphy(0,ix,iy,0) = 0 ;
+	YS_Vphy(0,ix,iy,0) = 0 ;
 
       }
 }

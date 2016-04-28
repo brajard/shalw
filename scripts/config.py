@@ -99,7 +99,7 @@ class Config_freerun (Config):
         
         sline = ''
         if (Ty>0):
-            sline=str(Ty)
+            sline=str(Ty)+'y'
             totaltime['str']=sline
             if (Tm-12*Ty > 0):
                 totaltime['str']=sline + '_' + str(Tm-12*Ty) +'m'
