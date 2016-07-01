@@ -27,7 +27,9 @@ tocompile = True
 configfile = 'Config_forw'
 
 try:
-    opts,args = getopt.getopt(sys.argv[1:],"hc:",["help","config=","exp=","suff=","nrun=","save_freq=","bck","no-compile"])
+    opts,args = \
+        getopt.getopt(sys.argv[1:],"hc:",
+                      ["help","config=","exp=","suff=","nrun=","save_freq=","bck_state=","bck","no-compile"])
 except getopt.GetoptError:
     run_usage()
     sys.exit(2)
@@ -36,6 +38,7 @@ exp_name = '02'
 suff = ''
 tocompile = True
 nrun = None
+bck_state = None
 save_freq=0
 bck = False
 
@@ -47,6 +50,8 @@ for opt,arg in opts:
         configfile = arg
     elif opt in ("--exp"):
         exp_name = arg
+    elif opt in ("--bck_state"):
+        bck_state = arg
     elif opt in ("--suff"):
         suff = arg
     elif opt in ("--no-compile"):
@@ -62,9 +67,14 @@ print "config class used : "+configfile
 print "nrun="+str(nrun)
 
 cfg = importlib.import_module('config')
-strclass = "cfg." + configfile + "(exp_name,suff,tocompile)"
+strclass = "cfg." + configfile + "(exp_name,suff,tocompile"
 if nrun is not None : #only for free model run
-	strclass = "cfg." + configfile + "(exp_name,suff,tocompile,nrun,save_freq=save_freq,bck=bck)"
+    strclass += ",nrun=nrun,save_freq=save_freq,bck=bck"
+if bck_state is not None:
+    strclass += ",bck_state=bck_state"
+
+strclass += ")"
+print strclass
 conf = eval(strclass)
 exp_name = conf.exp_name
 namelist= conf.namelist

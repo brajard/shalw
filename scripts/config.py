@@ -32,16 +32,34 @@ class Config_forw_nb (Config_forw):
         self.yao_opt['forw']='forw_nb.i'
 
 class Config_var (Config):
-    def __init__ (self,exp_name='02',suff='',tocompile=True):
+    def __init__ (self,exp_name='02',suff='',tocompile=True,bck_state='snapshot_bck_0.nc'):
         Config.__init__(self,exp_name,tocompile,suff)
         self.yao_opt['forw']='assim.i'
         self.namelist['indir']='output'
         self.namelist['obsfile']='obs_per_0.dat'
-        self.namelist['bck_state']='snapshot_bck_0.nc'
+        self.namelist['bck_state']=bck_state
         self.namelist['out_true']='state_true_' + suff + '.nc'
         self.namelist['out_bck']='state_bck_' + suff + '.nc'
         self.namelist['out_ret']='state_ret_' + suff + '.nc'
         self.namelist['out_obs']='obs_per_' + suff + '.dat'
+
+class Config_var_nb (Config):
+    """
+    Config class to be used in an assimilation without background, to specify another snapshot as a first guess
+    """
+    def __init__ (self,exp_name='02',suff='',tocompile=True,bck_state='snapshot_bck_0.nc'):
+        Config.__init__(self,exp_name,tocompile,suff)
+        self.yao_opt['forw']='assim.i'
+        self.namelist['indir']='output' #modified from parent class
+        self.namelist['bckper']='0' #modified from parent class
+        self.namelist['obsfile']='obs_per_0.dat'
+        self.namelist['bck_state']=bck_state
+        self.namelist['out_true']='state_true_' + suff + '.nc'
+        self.namelist['out_bck']='state_bck_' + suff + '.nc'
+        self.namelist['out_ret']='state_ret_' + suff + '.nc'
+        self.namelist['out_obs']='obs_per_' + suff + '.dat'
+        
+
 
 class Config_freerun (Config):
     def __init__ (self,exp_name='04',suff='',tocompile=True,nrun=1,dfile = '../src/shalw.d',dt=1800,save_freq=0,bck=False):
