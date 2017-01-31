@@ -50,14 +50,14 @@ for opt,arg in opts:
         configfile = arg
     elif opt in ("--exp"):
         exp_name = arg
+    elif opt in ("--bck"):
+        bck = True
     elif opt in ("--bck_state"):
         bck_state = arg
     elif opt in ("--suff"):
         suff = arg
     elif opt in ("--no-compile"):
-        tocompile = False
-    elif opt in ("--bck"):
-        bck = True	
+        tocompile = False	
     elif opt in ("--nrun"):
         nrun = int(arg)
     elif opt in ("--save_freq"):

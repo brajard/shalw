@@ -62,7 +62,7 @@ class Config_var_nb (Config):
 
 
 class Config_freerun (Config):
-    def __init__ (self,exp_name='04',suff='',tocompile=True,nrun=1,dfile = '../src/shalw.d',dt=1800,save_freq=0,bck=False):
+    def __init__ (self,exp_name='04',suff='',tocompile=True,nrun=1,dfile = '../src/shalw.d',dt=1800,save_freq=0,bck=False,bck_state='snapshot_bck_0.nc'):
         #nrun : number of integrated time
         Config.__init__(self,exp_name,tocompile,suff)
         self.indir = os.path.abspath(os.path.join('../data','EXP' + exp_name,self.namelist['indir']))
@@ -70,7 +70,7 @@ class Config_freerun (Config):
         self.yao_opt['forw']='spinup.i'
         self.namelist['bck_state']=None
 	if bck :
-		self.namelist['bck_state']='snapshot_bck_0.nc'
+		self.namelist['bck_state']=bck_state
         runtime = self.get_runtime(dfile)
         self.runtime = runtime
         totaltime = self.get_totaltime(runtime,nrun,dt)

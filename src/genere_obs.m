@@ -27,7 +27,7 @@ Tmax=1461;
 xmax=79;
 ymax=79;
 
-nobs=100000;
+nobs=50000;
 
 %X=nan*ones(nobs,1);
 
@@ -50,6 +50,7 @@ fclose(fid);
 end
 
 %% Plot
+if false
 load obs_val.dat
 t0=1460;
 if ~exist('Hfil')
@@ -58,3 +59,4 @@ end
 
 I=find(obs_val(:,3)==t0);
 scatter(obs_val(I,1),obs_val(I,2),40,obs_val(I,4),'filled');
+end

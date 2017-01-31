@@ -7,7 +7,7 @@ import sys
 import importlib
 
 #Size of the ensemble
-Nens = 3
+Nens = 30
 
 #Name of experiment
 exp_name = '09'
