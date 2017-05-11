@@ -7,10 +7,10 @@ import sys
 import importlib
 
 #Size of the ensemble
-Nens = 3
+Nens = 300
 
 #Name of experiment
-exp_name = '02'
+exp_name = '11'
 
 bindir = os.path.dirname(__file__)
 exfile = 'run_exp.py'
@@ -53,7 +53,11 @@ for i in range(Nens):
     optline = ' -c Config_var --no-compile --suff=' + str(i+1) + ' --exp='+exp_name
     fname = os.path.join(batchdir,'batch_' + str(i+1) + '.sh')
     qsubfile(os.path.abspath(os.path.join(bindir,exfile)) + ' ' + optline,fname,logfile)
-    os.system('qsub '+subopt+fname)
+
+    out=os.system('qsub '+subopt+fname)
+    if out != 0:
+        print 'trying running without dependance'
+        os.system('qsub '+fname)
     
 #    proc.append(sp.Popen([os.path.join(bindir,exfile) + ' ' + optline],
 #             shell=True,stdout = logfile, stderr=sp.STDOUT))
