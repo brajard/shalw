@@ -45,7 +45,7 @@ class Config_var (Config):
 
 class Config_var_nb (Config):
     """
-    Config class to be used in an assimilation without background, to specify another snapshot as a first guess
+    Config class to be used in an assimilation without background perturbation, to specify another snapshot as a first guess
     """
     def __init__ (self,exp_name='02',suff='',tocompile=True,bck_state='snapshot_bck_0.nc'):
         Config.__init__(self,exp_name,tocompile,suff)

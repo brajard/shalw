@@ -23,11 +23,11 @@ end
 
 %%Exp 2
 if (true)
-Tmax=1461;
+Tmax=4383;
 xmax=79;
 ymax=79;
 
-nobs=50000;
+nobs=30000;
 
 %X=nan*ones(nobs,1);
 

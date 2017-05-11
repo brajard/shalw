@@ -4,8 +4,8 @@
 defval SZX 80 
 defval SZY 80
 defval SZU 1 
-defval SZT 1461
-defval SZA 1462
+defval SZT 4383
+defval SZA 4384
 //defval K_LIN 
  
 hat_name "shalw.h" "renorm.h" 

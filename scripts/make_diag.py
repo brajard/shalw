@@ -1,12 +1,101 @@
+from __future__ import print_function 
 import os
 import sys
+import math
 sys.path.reverse() #look in anaconda paths first
 from netCDF4 import Dataset
 import numpy as np
 import matplotlib.pyplot as plt
+import re
+
 #from scipy.stats import chisquare
 
+def finalcost(imemb,logdir,pref='log_',suff='.out'): 
+    with open(os.path.join(logdir,pref+imemb+suff),'r') as f:
+        data = f.read()
+    m =re.findall('[ ]+f[ ]+=[ ]+[a-zA-z0-9.+]+',data)
+    if not len(m) == 2:
+        return None
+    cost = m[1]
+    cost = cost.split()[-1]
+    cost = float(cost.replace('D','E'))
+    return(cost)
 
+def hasConverged(imemb,logdir,pref='log_',suff='.out'):
+    """
+    look in the log file if the minimization has converged
+    imemb : member identification
+    """
+    try: 
+        imemb=str(imemb)
+    except ValueError:
+        print('not a valid member value')
+        raise
+    with open(os.path.join(logdir,pref+imemb+suff),'r') as f:
+        data = f.read()
+    m =re.findall('[ ]+f[ ]+=[ ]+[a-zA-z0-9.+]+',data)
+    if not len(m) == 2:
+        return False
+    cost = m[1]
+    cost = cost.split()[-1]
+    cost = float(cost.replace('D','E'))
+    return(not math.isnan(cost))
+
+def listmembers(dirname,pref_ret='state_ret',logdir='..',checkConv=True,pref='log_',suff='.out'):
+    """ give the list of members for a given experiment
+    if checkConv is True, check in the logdir (path relative to dirname) if the experiment has converged
+    """
+    lens = [re.split('[_.]',f)[-2] for f in os.listdir(dirname) if pref_ret in f]
+    if checkConv:
+        lens = [m for m in lens if hasConverged(m,os.path.abspath(os.path.join(dirname,logdir)),pref,suff)]
+    return lens
+
+class myexp():
+    def __init__(self,dirname,lens=None,true_file='state_true_0.nc',pref_ret='state_ret_',prod='Hfil'):
+        self.dirname = dirname
+        self.pref_ret = pref_ret
+        self.prod = prod
+        self.true_file = true_file
+        if lens is None:
+            self.lens = listmembers(self.dirname,pref_ret=self.pref_ret)
+        else:
+            self.lens = lens
+        
+    def __enter__(self):
+        print('Load EXP in directory ',os.path.join(self.dirname,self.true_file))
+        self.ft = Dataset(os.path.join(self.dirname,self.true_file))
+        self.xt = self.ft.variables[self.prod]
+    #ft.close()
+        self.xa = []#np.zeros((Nens,)+xt.shape)
+        self.fx = []
+        for ens in self.lens:
+            fname = self.pref_ret + ens + '.nc'
+        #print os.path.join(dirname,fname)
+            self.fx.append(Dataset(os.path.join(self.dirname,fname)))
+        #xa[i,:,:,:]=fx.variables[prod][:]
+            self.xa.append(self.fx[-1].variables[self.prod])
+       
+    
+        print ("Number of members loaded:",len(self.xa))
+        return(self.xa,self.xt,self.ft,self.fx)
+
+    def __exit__(self,type,value,traceback):
+        self.ft.close()
+        for f in self.fx:
+            f.close()
+        
+def computerms(xa,xt,name=None):
+    delta = (xa-xt)**2
+    delta= np.reshape(delta,[delta.shape[0],-1])
+    rms = np.sqrt(np.mean(delta,axis=1))
+    if name is not None:
+        tax = np.arange(len(rms))*(1.0/48)
+        f1,ax = plt.subplots()
+        ax.plot(tax,rms)
+        ax.set_xlabel('Days')
+        ax.set_ylabel('RMS error')
+        f1.savefig(name)
+    return(rms)
 
 def compute_cost(dirname,suff='1',bfile = 'state_bck_',afile='state_ret_',ofile='obs_per_',scoef='scoef.i',bcoef='bcoef.i'):
     obfile = ofile + suff + '.dat'
@@ -47,7 +136,7 @@ def load_exp(dirname,Nens,true_file='state_true_0.nc',pref_ret='state_ret_',prod
     xa = np.zeros((Nens,)+xt.shape)
     for i in range(Nens):
         fname = pref_ret + str(i+1) + '.nc'
-        print os.path.join(dirname,fname)
+        print(os.path.join(dirname,fname))
         fx = Dataset(os.path.join(dirname,fname))
         xa[i,:,:,:]=fx.variables[prod][:]
         fx.close()
@@ -235,7 +324,7 @@ def rank_diag(xt,xa,hinit=None,mask=None):
         ind = np.searchsorted(l,xxt[i])
         hinit[ind-1]+=1
     
-    print 'chi2 test'
+    print ('chi2 test')
 #    fstat,pvalue=chisquare(hinit)
  #   print 'stat =',fstat,' ; pvalue = ' , pvalue
   #  plt.bar(np.arange(Nens+1),hinit)
@@ -248,6 +337,17 @@ def rank_diag(xt,xa,hinit=None,mask=None):
 #    plt.show()
 
     return(hinit)
+
+
+def plot_H(H, fname):
+    Nens = H.size
+    N = np.sum(H)
+    f1,ax = plt.subplots(figsize=(10,5))
+    ax.bar(np.arange(Nens),H)
+    ax.plot([0,Nens+1],[float(N)/Nens]*2,'--r')
+    ax.set_xlabel('bins')
+    ax.set_ylabel('frequency')
+    plt.savefig(fname,dpi=200)
 
 if __name__ == "__main__":
     Nens = 30
@@ -264,5 +364,5 @@ if __name__ == "__main__":
 #plt.show()
     J = np.zeros(Nens)
     for i in range(Nens):
-        print i
+        print (i)
         J[i]= compute_cost(dirname,suff=str(i+1))
