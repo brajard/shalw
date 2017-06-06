@@ -7,10 +7,10 @@ import sys
 import importlib
 
 #Size of the ensemble
-Nens = 300
+Nens = 10
 
 #Name of experiment
-exp_name = '11'
+exp_name = '12'
 
 bindir = os.path.dirname(__file__)
 exfile = 'run_exp.py'
@@ -50,7 +50,8 @@ subopt = '-W depend=afterok:'+jobid+' '
 
 for i in range(Nens):
     logfile = os.path.join(expdir,'log_'+str(i+1)+'.out')
-    optline = ' -c Config_var --no-compile --suff=' + str(i+1) + ' --exp='+exp_name
+    #optline = ' -c Config_var --no-compile --suff=' + str(i+1) + ' --exp='+exp_name
+    optline = ' -c Config_var_nb --no-compile --bck_state="state_72_.nc" --suff=' + str(i+1) + ' --exp='+exp_name
     fname = os.path.join(batchdir,'batch_' + str(i+1) + '.sh')
     qsubfile(os.path.abspath(os.path.join(bindir,exfile)) + ' ' + optline,fname,logfile)
 
