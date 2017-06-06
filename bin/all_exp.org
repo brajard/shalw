@@ -1,0 +1,62 @@
+* Execute the 10 years spinup in EXP01
+  ./run_exp.py --exp=01 --config=Config_freerun --nrun=120
+  
+* Execute the 10 years forward run in EXP08
+  cp ../data/EXP01/output/state_10m_4d_.nc ../data/EXP08/input/snapshot_bck_0.nc
+  ./run_exp.py --exp=08 --config=Config_freerun --save_freq=12 --nrun=120 --bck
+
+* Execute a assimilation with 50000 obs in EXP09 taking a a difference as background
+  mkdir /data/jbrajard/data/EXP09
+  cd ~/case-study/2016/shalw/data
+  ln -s /data/jbrajard/data/EXP09
+  mkdir EXP09/input
+  mkdir EXP09/output
+  cd ~/case-study/2016/shalw/data/EXP09/
+  #Modif [[file:~/case-study/2016/shalw/src/genere_obs.m]]
+  #launch genere_obs in matlab
+  mv ~/case-study/2016/shalw/src/obs.dat ~/case-study/2016/shalw/data/EXP09/input
+  cp  ~/case-study/2016/shalw/data/EXP08/output/state_0_.nc input/snapshot_10.nc
+  cp  ~/case-study/2016/shalw/data/EXP08/output/state_72_.nc output/
+  #Modify run_allbatch (exp name, Nens, optline)
+  ./run_allbatch.sh
+* Execute a 31 years forward run in EXP10
+  mkdir ../data/EXP10
+  mkdir ../data/EXP10/output
+  mkdir ../data/EXP10/input
+  cp ../data/EXP01/output/state_10m_4d_.nc ../data/EXP10/input/snapshot_bck_0.nc
+  ./run_exp.py --exp=10 --config=Config_freerun --save_freq=12 --nrun=372 --bck
+* Execute a assimilation with 30000 obs in EXP11 with a 3month window with 300 members
+  mkdir /data/jbrajard/data/EXP11
+  cd ~/case-study/2016/shalw/data
+  ln -s /data/jbrajard/data/EXP11
+  mkdir EXP11/input
+  mkdir EXP11/output
+  cd ~/case-study/2016/shalw/data/EXP11
+  #Modif [[file:~/case-study/2016/shalw/src/genere_obs.m]] (Tmax=, nobs)
+  #launch genere_obs in matlab
+  mv ~/case-study/2016/shalw/src/obs.dat ~/case-study/2016/shalw/data/EXP11/input
+  cp  ~/case-study/2016/shalw/data/EXP08/output/state_0_.nc input/snapshot_10.nc
+  cp  ~/case-study/2016/shalw/data/EXP08/output/state_72_.nc output/
+  #modify [[file:~/case-study/2016/shalw/src/shalw.d][shalw.d]] (SZT 4383 SZA 4384)
+  #Modify [[file:run_allbatch.sh][run_all_batch]] 
+  # (exp name, Nens, optline1 = ' -c Config_forw --suff=0 --exp='+exp_name,opt, optline2 = ' -c Config_var --no-compile --suff=' + str(i+1) + ' --exp='+exp_name)
+ cd ~/case-study/2016/shalw/bin
+ #check if PBS -q day
+  ./run_allbatch.sh
+* Execute a assimialtion with 30000 obs in EXP12 with a 3 month window with 10 members taking a snapshot (state_72_.nc as background)
+  mkdir /data/jbrajard/data/EXP12
+  cd ~/case-study/2016/shalw/data
+  ln -s /data/jbrajard/data/EXP12
+  mkdir EXP12/input
+  mkdir EXP12/output
+  cd ~/case-study/2016/shalw/data/EXP12/
+  #Modif [[file:~/case-study/2016/shalw/src/genere_obs.m]]
+  #launch genere_obs in matlab
+  mv ~/case-study/2016/shalw/src/obs.dat ~/case-study/2016/shalw/data/EXP12/input
+  cp  ~/case-study/2016/shalw/data/EXP08/output/state_0_.nc input/snapshot_10.nc
+  cp  ~/case-study/2016/shalw/data/EXP08/output/state_72_.nc output/
+  #Modify run_allbatch (exp name, Nens, optline)
+ #Modify [[file:run_allbatch.sh][run_all_batch]] 
+  # (exp name, Nens, optline1 = ' -c Config_forw --suff=0 --exp='+exp_name,opt, optline2 = ' -c Config_var --no-compile --bck_state="state_72_.nc" --suff=' + str(i+1) + ' --exp='+exp_name)
+ cd ~/case-study/2016/shalw/bin
+  ./run_allbatch.sh
