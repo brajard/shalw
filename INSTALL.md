@@ -1,4 +1,4 @@
-source create --name shalw python=3
+conda create --name shalw python=3
 
 source activate shalw
 
