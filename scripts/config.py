@@ -69,8 +69,8 @@ class Config_freerun (Config):
         self.suff=suff
         self.yao_opt['forw']='spinup.i'
         self.namelist['bck_state']=None
-	if bck :
-		self.namelist['bck_state']=bck_state
+        if bck:
+            self.namelist['bck_state']=bck_state
         runtime = self.get_runtime(dfile)
         self.runtime = runtime
         totaltime = self.get_totaltime(runtime,nrun,dt)
@@ -78,7 +78,7 @@ class Config_freerun (Config):
         self.create_loop(nrun,save_freq)
 
     def create_loop(self,nrun,save_freq=0):
-        print 'nrun=',str(nrun)
+        print ('nrun=',str(nrun))
         file = open(os.path.join(self.indir,'loop.i'),'w')
         if self.namelist['bck_state'] is not None:
             file.write('xload_init '+self.namelist['bck_state']+'\n')

@@ -16,13 +16,15 @@ reload(diag)
 import re
 from mytools import makedirs_sure
 
-datadir = '/data/jbrajard/data/'
+datadir = '/homedata/jbrajard/shalwdata/'
 #datadir = '/data/ealexiou'
-expname = 'EXP11'
+expname = 'EXP16'
 diagdic = {
-#    'rank_diag':{'tmask':1460, 'mask':80, 'nens':21},
+#    'rank_diag':{'tmask':-1, 'mask':80, 'nens':9},
 #    'cost':None,
-    'rms':None
+    'allcost':None,
+#    'rms':None,
+#    'dh':{'names':{'state_bck_4.nc','state_ret_4.nc','state_true_0.nc'}}
     }
 
 #For rank_diag
@@ -40,7 +42,7 @@ expdir = os.path.join(os.path.join(datadir,expname,'output'))
 
 #Definition of the ensemble
 lens = diag.listmembers(expdir)
-lens = lens[:21]
+#lens = lens[:21]
 for d in diagdic:
     dv = diagdic[d]
     if d == 'rank_diag':
@@ -68,6 +70,13 @@ for d in diagdic:
                 H = diag.rank_diag_fast(xtt,xaa,hinit=H)
                 print(sum(H))
         diag.plot_H(H,os.path.join(figdir,'rank_diag.png'))
+    
+    elif d == 'dh':
+        for name in dv['names']:
+            diag.compute_dh(expdir,name,figdir)
+    elif d == 'allcost':
+        allcost = [diag.allcost(imemb,os.path.join(datadir,expname)) for imemb in lens]
+        diag.plotcost(allcost,figdir)
 
     elif d == 'rms':
         print('--- compute RMS ---')    
@@ -78,7 +87,7 @@ for d in diagdic:
 
     elif d == 'cost':
         print('--- compute final cost ---')
-        cost = [diag.finalcost(imemb,os.path.join(datadir,expname)) for imemb in lens]
-
+        cost = {imemb:diag.finalcost(imemb,os.path.join(datadir,expname)) for imemb in lens}
+        print(cost)
     else:
         print('--- diag ' + d + ' not implemented ---')

@@ -63,8 +63,8 @@ for opt,arg in opts:
     elif opt in ("--save_freq"):
         save_freq=int(arg)
 
-print "config class used : "+configfile
-print "nrun="+str(nrun)
+print ("config class used : "+configfile)
+print ("nrun="+str(nrun))
 
 cfg = importlib.import_module('config')
 strclass = "cfg." + configfile + "(exp_name,suff,tocompile"
@@ -74,7 +74,7 @@ if bck_state is not None:
     strclass += ",bck_state=bck_state"
 
 strclass += ")"
-print strclass
+print (strclass)
 conf = eval(strclass)
 exp_name = conf.exp_name
 namelist= conf.namelist
@@ -95,7 +95,7 @@ namelist['outdir']=os.path.join(expdir,namelist['outdir'])
 #print cdir
 #print bindir
 #print srcdir
-print expdir
+print (expdir)
 
 #prepare paths
 makedirs_sure(expdir)
@@ -131,7 +131,7 @@ if os.path.isfile(exefile):
               exefile + ' namelist ' + 
               namefile + ' -i ' + yao_opt["forw"] + 
               ' ; cd ' + cdir]
-    print strcmd
+    print (strcmd)
     sp.call(
         strcmd,
         shell=True)

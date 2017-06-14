@@ -10,7 +10,7 @@ import importlib
 Nens = 10
 
 #Name of experiment
-exp_name = '12'
+exp_name = '16'
 
 bindir = os.path.dirname(__file__)
 exfile = 'run_exp.py'
@@ -33,7 +33,7 @@ def qsubfile(cmdline,fname,output,header='batch_header.sh'):
     #os.system('chmod u+x '+fname)
 
 #Forward to generate observations
-print 'Running forward model...'
+print ('Running forward model...')
 optline = ' -c Config_forw --suff=0 --exp='+exp_name
 logfile = os.path.join(expdir,'log_0.out')
 fname = os.path.join(batchdir,'batch_0.sh')
@@ -41,23 +41,23 @@ qsubfile(os.path.abspath(os.path.join(bindir,exfile)) + ' ' + optline,fname,logf
 #sp.call([os.path.join(bindir,exfile) + ' ' + optline],shell=True,stdout = logfile, stderr=sp.STDOUT)
 #os.system('qsub ' + fname)
 out=sp.check_output('qsub '+fname,shell=True)
-jobid = out.rstrip()
+jobid = out.rstrip().decode("utf-8") 
 end = time.time()
 #Assim
-print 'Running EnsVar...(elapsed time = ', end-start, 'sec)'
+print ('Running EnsVar...(elapsed time = ', end-start, 'sec)')
 proc=[]
 subopt = '-W depend=afterok:'+jobid+' '
 
 for i in range(Nens):
     logfile = os.path.join(expdir,'log_'+str(i+1)+'.out')
     #optline = ' -c Config_var --no-compile --suff=' + str(i+1) + ' --exp='+exp_name
-    optline = ' -c Config_var_nb --no-compile --bck_state="state_72_.nc" --suff=' + str(i+1) + ' --exp='+exp_name
+    optline = ' -c Config_var --no-compile  --suff=' + str(i+1) + ' --exp='+exp_name
     fname = os.path.join(batchdir,'batch_' + str(i+1) + '.sh')
     qsubfile(os.path.abspath(os.path.join(bindir,exfile)) + ' ' + optline,fname,logfile)
-
+    print('qsub '+subopt+fname)
     out=os.system('qsub '+subopt+fname)
     if out != 0:
-        print 'trying running without dependance'
+        print ('trying running without dependance')
         os.system('qsub '+fname)
     
 #    proc.append(sp.Popen([os.path.join(bindir,exfile) + ' ' + optline],

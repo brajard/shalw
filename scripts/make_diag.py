@@ -7,8 +7,102 @@ from netCDF4 import Dataset
 import numpy as np
 import matplotlib.pyplot as plt
 import re
+import pandas as pd
 
+
+def compute_dh(outdir,name,figdir,yi=40,ti=100,figname=None,prod='Hfil'):
+    f = Dataset(os.path.join(outdir,name))
+    x = f.variables[prod]
+    dh = x[1:,yi,:] - x[:-1,yi,:]
+    f.close()
+    t = np.arange(dh.shape[0])*(1.0/48) #dt=30min
+    vmin = np.min(dh.ravel())
+    vmax = np.max(dh.ravel())
+    fig,ax = plt.subplots(1,2)
+    im=ax[0].imshow(dh[:ti],extent=[0,79,t[0],t[ti]],aspect='auto',vmin=vmin,vmax=vmax)
+    ax[0].set_xlabel('x')
+    ax[0].set_ylabel('time')
+    ax[0].set_title('dh/dt')
+    ax[1].imshow(dh[ti:],extent=[0,79,t[-ti],t[-1]],aspect='auto',vmin=vmin,vmax=vmax)
+    ax[1].set_xlabel('x')
+    ax[1].set_ylabel('time')
+    fig.subplots_adjust(right=0.8)
+    cbar_ax = fig.add_axes([0.8, 0.15, 0.05, 0.7])
+    fig.colorbar(im, cax=cbar_ax)
+    if figname is None:
+        figname = os.path.splitext(name)[0]+'_dh'
+    fig.savefig(os.path.join(figdir,figname+'.png'))
 #from scipy.stats import chisquare
+
+def recompute_finalcost(outdir,imemb,
+                        obs_pref='obs_per_',
+                        xa_pref='state_ret_',
+                        xt_name='state_true_0',
+                        xb_pref='state_bck_',
+                        prod = 'Hfil'):
+    fa = Dataset(os.path.join(outdir,xa_pref+imemb+'.nc'))
+    xa = fa.variables[prod]
+    if xb_pref is not None:
+        fb = Dataset(os.path.join(outdir,xb_pref+imemb+'.nc'))
+        xb = fb.variables[prod]
+
+        
+    obs = pd.read_csv(os.path.join(outdir,obs_pref+imemb+'.dat'),
+                      sep = ' ',
+                      skiprows = 1,
+                      names = ['x','y','t','val'])
+    
+    #innovation (error for obs)
+    innov = np.zeros(obs.val.shape)
+    for index,row in obs.iterrows():
+        x = int(row['x'])
+        y = int(row['y'])
+        t = int(row['t'])
+        modval = xa[t,y,x]
+        innov[index] = modval - row['val']
+    Jobs = np.sum (np.square(innov))
+    
+
+    if xb_pref is not None:    
+    #background error
+        errb = xa[0,:,:] - xb[0,:,:]
+        Jbck = np.sum(np.square(errb.ravel()))
+
+
+    fa.close()        
+    if xb_pref is not None:
+        fb.close()
+
+                  
+
+
+def extract_cost(l):
+    """ extract cost info from str 'iter n,simul j,f= cost'
+    return typledict (n,j,cost)"""
+    m = l.split(',')
+    niter = int(m[0].split(' ')[-1])
+    nsimul = int(m[1].split(' ')[-1])
+    cost = float(m[2].split(' ')[-1].replace('D','E'))
+    return{'niter':niter,'nsimul':nsimul,'cost':cost}
+
+def allcost(imemb,logdir,pref='log_',suff='.out'):
+    with open(os.path.join(logdir,pref+imemb+suff),'r') as f:
+        data = f.read()
+    pat = '[ ]*iter[ ]+[0-9]+,[ ]+simul[ ]+[0-9]+,[ ]f=[ ]+[0-9.+D]+' 
+    m =re.findall(pat,data)
+    allcost = [extract_cost(l) for l in m]
+    niter = [c['niter'] for c in allcost]
+    cost = [c['cost'] for c in allcost]
+    return {'niter':niter,'cost':cost}
+
+
+def plotcost(allcost,figdir,fname='cost.png'):
+    f1,ax = plt.subplots()
+    for l in allcost:
+        ax.semilogy(l['niter'],l['cost'],color='gray')
+    ax.set_xlabel('iteration')
+    ax.set_ylabel('cost function')
+    f1.savefig(os.path.join(figdir,fname))
 
 def finalcost(imemb,logdir,pref='log_',suff='.out'): 
     with open(os.path.join(logdir,pref+imemb+suff),'r') as f:
