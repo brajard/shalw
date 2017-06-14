@@ -39,7 +39,7 @@
   cp  ~/case-study/2016/shalw/data/EXP08/output/state_72_.nc output/
   #modify [[file:~/case-study/2016/shalw/src/shalw.d][shalw.d]] (SZT 4383 SZA 4384)
   #Modify [[file:run_allbatch.sh][run_all_batch]] 
-  # (exp name, Nens, optline1 = ' -c Config_forw --suff=0 --exp='+exp_name,opt, optline2 = ' -c Config_var --no-compile --suff=' + str(i+1) + ' --exp='+exp_name)
+  # (exp name, Nens, optline1 = ' -c Config_forw --suff=0 --exp='+exp_name,opt, optline2 = ' -c Config_var_nb --no-compile --suff=' + str(i+1) + ' --exp='+exp_name)
  cd ~/case-study/2016/shalw/bin
  #check if PBS -q day
   ./run_allbatch.sh
@@ -59,4 +59,53 @@
  #Modify [[file:run_allbatch.sh][run_all_batch]] 
   # (exp name, Nens, optline1 = ' -c Config_forw --suff=0 --exp='+exp_name,opt, optline2 = ' -c Config_var --no-compile --bck_state="state_72_.nc" --suff=' + str(i+1) + ' --exp='+exp_name)
  cd ~/case-study/2016/shalw/bin
+  ./run_allbatch.sh
+* Execute a assimialtion with 30000 obs in EXP14 with a 3 month window with 10 members taking a perturbed background
+ mkdir /homedata/jbrajard/shalwdata/EXP14
+  cd ~/project/aves/shalw/data
+  ln -s /homedata/jbrajard/shalwdata/EXP14
+  mkdir EXP14/input
+  mkdir EXP14/output
+  cd ~/project/aves/shalw/data/EXP14/
+  #Modif [[file:~/project/aves/shalw/src/genere_obs.m]]
+  #launch genere_obs in matlab
+  mv ~/project/aves/shalw/src/obs.dat ~/project/aves/shalw/data/EXP14/input
+  cp  ~/project/aves/shalw/data/EXP08/output/state_0_.nc input/snapshot_10.nc
+  cp  ~/project/aves/shalw/data/EXP08/output/state_72_.nc output/
+  #Modify run_allbatch (exp name, Nens, optline)
+ #Modify [[file:run_allbatch.sh][run_all_batch]] 
+  # (exp name, Nens, optline1 = ' -c Config_forw --suff=0 --exp='+exp_name,opt, optline2 = ' -c Config_var --no-compile --suff=' + str(i+1) + ' --exp='+exp_name)
+ cd ~/project/aves/shalw/bin
+  ./run_allbatch.sh
+* Execute a assimialtion with 100000 obs in EXP15 with a 3 month window with 10 members taking a perturbed background
+ mkdir /homedata/jbrajard/shalwdata/EXP15
+  cd ~/project/aves/shalw/data
+  ln -s /homedata/jbrajard/shalwdata/EXP15
+  mkdir EXP15/input
+  mkdir EXP15/output
+  cd ~/project/aves/shalw/data/EXP15/
+  #Modif [[file:~/project/aves/shalw/src/genere_obs.m]]
+  #launch genere_obs in matlab
+  mv ~/project/aves/shalw/src/obs.dat ~/project/aves/shalw/data/EXP15/input
+  cp  ~/project/aves/shalw/data/EXP08/output/state_0_.nc input/snapshot_10.nc
+  cp  ~/project/aves/shalw/data/EXP08/output/state_72_.nc output/
+  #Modify run_allbatch (exp name, Nens, optline)
+ #Modify [[file:run_allbatch.sh][run_all_batch]] 
+  # (exp name, Nens, optline1 = ' -c Config_forw --suff=0 --exp='+exp_name,opt, optline2 = ' -c Config_var --no-compile --suff=' + str(i+1) + ' --exp='+exp_name)
+ cd ~/project/aves/shalw/bin
+  ./run_allbatch.sh
+* Execute a assimialtion with 100000 obs in EXP16 with a 3 month window with 10 members taking a perturbed background with more iterations
+ mkdir /homedata/jbrajard/shalwdata/EXP16
+  cd ~/project/aves/shalw/data
+  ln -s /homedata/jbrajard/shalwdata/EXP16
+  mkdir EXP16/input
+  mkdir EXP16/output
+  cd ~/project/aves/shalw/data/EXP16/
+  ln -s ~/project/aves/shalw/data/EXP15/input/obs.dat  ~/project/aves/shalw/data/EXP16/input
+  cp  ~/project/aves/shalw/data/EXP08/output/state_0_.nc input/snapshot_10.nc
+  #Modify run_allbatch (exp name, Nens, optline)
+ #Modify [[file:run_allbatch.sh][run_all_batch]] 
+  # (exp name, Nens, optline1 = ' -c Config_forw --suff=0 --exp='+exp_name,opt, optline2 = ' -c Config_var --no-compile --suff=' + str(i+1) + ' --exp='+exp_name)
+  #modify [[file:~/project/aves/shalw/scripts/assim.i][assim.i]] to have 1200 simul and 600 iter
+ cd ~/project/aves/shalw/bin
   ./run_allbatch.sh
